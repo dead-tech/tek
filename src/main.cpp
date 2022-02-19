@@ -1,4 +1,3 @@
-#include <any>
 #include <fmt/format.h>
 #include <fstream>
 #include <sstream>
@@ -9,6 +8,7 @@
 #include "logger/Logger.hpp"
 #include "tokenizer/Token.hpp"
 #include "tokenizer/Tokenizer.hpp"
+#include "utils/fs.hpp"
 
 void usage() { fmt::print("Usage: tek [file]\n"); }
 
@@ -35,20 +35,8 @@ void run_prompt() {
     }
 }
 
-// TODO: Make this a std::filesystem::path
-std::string read_file(const std::string& file_path) {
-    std::ifstream file{file_path};
-    std::stringstream ss;
-
-    ss << file.rdbuf();
-
-    file.close();
-    return ss.str();
-}
-
-// TODO: Make this a std::filesystem::path
 void run_file(const std::string& file_path) {
-    const auto source_code = read_file(file_path);
+    const auto source_code = read_file(std::filesystem::path(file_path));
     run(source_code);
 
     if (Logger::had_error) {

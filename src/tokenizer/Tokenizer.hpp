@@ -32,7 +32,6 @@ class Tokenizer {
 
     void string_literal();
 
-    // TODO: Probably better ways to do this
     void number_literal();
 
     void identifier();

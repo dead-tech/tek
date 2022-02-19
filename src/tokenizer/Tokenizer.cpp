@@ -71,19 +71,15 @@ void Tokenizer::string_literal() {
     this->add_token(TokenType::STRING, string_literal);
 }
 
-// TODO: Probably better ways to do this
 void Tokenizer::number_literal() {
     while (std::isdigit(this->peek())) {
         this->advance();
     }
 
     if (this->peek() == '.' && std::isdigit(this->peek_next())) {
-        this->advance();
-
-        // TODO: this could be a do while
-        while (std::isdigit(this->peek())) {
+        do {
             this->advance();
-        }
+        } while (std::isdigit(this->peek()));
     }
 
     const auto str_number =
@@ -169,7 +165,6 @@ void Tokenizer::scan_token() {
         }
         break;
     // Ignore whitespace character
-    // TODO: check if this can be done with std::isspace
     case ' ':
     case '\r':
     case '\t':
