@@ -6,6 +6,8 @@
 #include <iostream>
 
 #include "logger/Logger.hpp"
+#include "parser/AstPrinter.hpp"
+#include "parser/expressions/Expression.hpp"
 #include "tokenizer/Token.hpp"
 #include "tokenizer/Tokenizer.hpp"
 #include "utils/fs.hpp"
@@ -44,7 +46,7 @@ void run_file(const std::string& file_path) {
     }
 }
 
-int main(int argc, char** argv) {
+int main2(int argc, char** argv) {
     if (argc < 2) {
         usage();
     } else if (argc == 2) {
@@ -54,4 +56,14 @@ int main(int argc, char** argv) {
     }
 
     return 0;
+}
+
+int main() {
+    Expression* expression = new BinaryExpression(
+        new UnaryExpression(Token(TokenType::MINUS, "-", "", 1),
+                            new LiteralExpression(123.0)),
+        Token(TokenType::STAR, "*", "", 1),
+        new GroupingExpression(new LiteralExpression(45.67)));
+
+    fmt::print("{}\n", AstPrinter().print(expression));
 }

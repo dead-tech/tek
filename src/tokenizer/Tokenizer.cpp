@@ -8,10 +8,7 @@ std::vector<Token> Tokenizer::tokenize() {
         this->scan_token();
     }
 
-    this->tokens.push_back(Token{.type = TokenType::ENDOF,
-                                 .lexeme = "",
-                                 .literal = "",
-                                 .line = this->line});
+    this->tokens.push_back(Token{TokenType::ENDOF, "", "", this->line});
     return this->tokens;
 }
 

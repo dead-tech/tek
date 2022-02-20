@@ -64,7 +64,9 @@ struct Token {
     std::any literal;
     std::size_t line;
 
-    Token() = default;
+    Token(const TokenType& type, const std::string& lexeme,
+          const std::any& literal, const size_t line)
+        : type{type}, lexeme{lexeme}, literal{literal}, line{line} {};
 
     [[nodiscard]] std::string to_string() const noexcept;
 };
