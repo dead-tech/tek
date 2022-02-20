@@ -1,14 +1,15 @@
 #ifndef AstPrinter_HPP
 #define AstPrinter_HPP
 
-#include "expressions/Expression.hpp"
+#include "Expressions.hpp"
+#include <memory>
 #include <sstream>
 #include <string>
 #include <vector>
 
 class AstPrinter : public Visitor<std::string> {
   private:
-    using ExpressionPtr = Expression*;
+    using ExpressionPtr = std::unique_ptr<Expression>;
 
   public:
     std::string print(ExpressionPtr expression);

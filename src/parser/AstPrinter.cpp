@@ -6,22 +6,21 @@ std::string AstPrinter::print(AstPrinter::ExpressionPtr expression) {
 
 std::string AstPrinter::visit_binary_expression(BinaryExpression& expression) {
     return this->parenthesize(expression.op.lexeme,
-                              {expression.left, expression.right});
+                              {expression.left.get(), expression.right.get()});
 }
 
 std::string
 AstPrinter::visit_grouping_expression(GroupingExpression& expression) {
-    return this->parenthesize("group", {expression.expression});
+    return this->parenthesize("group", {expression.expression.get()});
 }
 
 std::string
 AstPrinter::visit_literal_expression(LiteralExpression& expression) {
-    // TODO: better way to do this
     return expression.literal.get();
 }
 
 std::string AstPrinter::visit_unary_expression(UnaryExpression& expression) {
-    return this->parenthesize(expression.op.lexeme, {expression.right});
+    return this->parenthesize(expression.op.lexeme, {expression.right.get()});
 }
 
 std::string

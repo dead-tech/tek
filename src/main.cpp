@@ -1,13 +1,10 @@
 #include <fmt/format.h>
-#include <fstream>
-#include <sstream>
-#include <string>
-// TODO: There's gotta be a better way
 #include <iostream>
+#include <string>
 
 #include "logger/Logger.hpp"
 #include "parser/AstPrinter.hpp"
-#include "parser/expressions/Expression.hpp"
+#include "parser/Expressions.hpp"
 #include "tokenizer/Token.hpp"
 #include "tokenizer/Tokenizer.hpp"
 #include "utils/fs.hpp"
@@ -59,12 +56,13 @@ int main2(int argc, char** argv) {
 }
 
 int main() {
-    // TODO: Memory leak!
-    Expression* expression = new BinaryExpression(
-        new UnaryExpression(Token(TokenType::MINUS, "-", "", 1),
-                            new LiteralExpression(123.0)),
+    std::unique_ptr<Expression> expression = std::make_unique<BinaryExpression>(
+        std::make_unique<UnaryExpression>(
+            Token(TokenType::MINUS, "-", "", 1),
+            std::make_unique<LiteralExpression>(123.0)),
         Token(TokenType::STAR, "*", "", 1),
-        new GroupingExpression(new LiteralExpression(45.67)));
+        std::make_unique<GroupingExpression>(
+            std::make_unique<LiteralExpression>(45.67)));
 
-    fmt::print("{}\n", AstPrinter().print(expression));
+    fmt::print("{}\n", AstPrinter().print(std::move(expression)));
 }

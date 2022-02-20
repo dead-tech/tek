@@ -18,8 +18,8 @@ struct Literal {
 
   public:
     explicit Literal(variant_t literal);
-    [[nodiscard]] auto get() const;
-    [[nodiscard]] auto get();
+    [[nodiscard]] std::string get() const;
+    [[nodiscard]] std::string get();
 
   private:
     variant_t literal;

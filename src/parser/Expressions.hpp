@@ -1,11 +1,11 @@
 #ifndef EXPRESSION_HPP
 #define EXPRESSION_HPP
 
-#include "../../tokenizer/Token.hpp"
-#include "../../types/Literal.hpp"
+#include "../tokenizer/Token.hpp"
+#include "../types/Literal.hpp"
+#include <memory>
 #include <variant>
 
-// TODO: split into own file
 // TODO: use namespaces
 
 template <typename ReturnType> class Visitor;
@@ -16,7 +16,7 @@ class Expression {
 
   protected:
     // TODO: use unique_ptr
-    using ExpressionPtr = Expression*;
+    using ExpressionPtr = std::unique_ptr<Expression>;
 };
 
 class BinaryExpression : public Expression {
