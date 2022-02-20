@@ -16,13 +16,8 @@ AstPrinter::visit_grouping_expression(GroupingExpression& expression) {
 
 std::string
 AstPrinter::visit_literal_expression(LiteralExpression& expression) {
-    if (std::holds_alternative<std::string>(expression.literal)) {
-        return std::get<std::string>(expression.literal);
-    } else if (std::holds_alternative<double>(expression.literal)) {
-        return std::to_string(std::get<double>(expression.literal));
-    } else {
-        return "";
-    }
+    // TODO: better way to do this
+    return expression.literal.get();
 }
 
 std::string AstPrinter::visit_unary_expression(UnaryExpression& expression) {

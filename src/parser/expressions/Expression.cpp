@@ -16,7 +16,7 @@ std::string GroupingExpression::accept(Visitor<std::string>& visitor) {
     return visitor.visit_grouping_expression(*this);
 }
 
-LiteralExpression::LiteralExpression(std::variant<double, std::string> literal)
+LiteralExpression::LiteralExpression(Literal::variant_t literal)
     : literal{std::move(literal)} {}
 
 std::string LiteralExpression::accept(Visitor<std::string>& visitor) {

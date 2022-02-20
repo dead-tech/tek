@@ -2,7 +2,11 @@
 #define EXPRESSION_HPP
 
 #include "../../tokenizer/Token.hpp"
+#include "../../types/Literal.hpp"
 #include <variant>
+
+// TODO: split into own file
+// TODO: use namespaces
 
 template <typename ReturnType> class Visitor;
 
@@ -11,6 +15,7 @@ class Expression {
     virtual std::string accept(Visitor<std::string>& visitor) = 0;
 
   protected:
+    // TODO: use unique_ptr
     using ExpressionPtr = Expression*;
 };
 
@@ -38,12 +43,12 @@ class GroupingExpression : public Expression {
 
 class LiteralExpression : public Expression {
   public:
-    explicit LiteralExpression(std::variant<double, std::string> literal);
+    explicit LiteralExpression(Literal::variant_t literal);
 
     std::string accept(Visitor<std::string>& visitor) override;
 
   public:
-    std::variant<double, std::string> literal;
+    Literal literal;
 };
 
 class UnaryExpression : public Expression {

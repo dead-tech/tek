@@ -59,6 +59,7 @@ int main2(int argc, char** argv) {
 }
 
 int main() {
+    // TODO: Memory leak!
     Expression* expression = new BinaryExpression(
         new UnaryExpression(Token(TokenType::MINUS, "-", "", 1),
                             new LiteralExpression(123.0)),
