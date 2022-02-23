@@ -6,71 +6,74 @@
 #include <memory>
 #include <variant>
 
-// TODO: use namespaces
+namespace tek::parser {
 
-template <typename ReturnType> class Visitor;
+    template <typename ReturnType> class Visitor;
 
-class Expression {
-  public:
-    virtual std::string accept(Visitor<std::string>& visitor) = 0;
+    class Expression {
+      public:
+        virtual std::string accept(Visitor<std::string>& visitor) = 0;
 
-  protected:
-    // TODO: use unique_ptr
-    using ExpressionPtr = std::unique_ptr<Expression>;
-};
+      protected:
+        // TODO: use unique_ptr
+        using ExpressionPtr = std::unique_ptr<Expression>;
+    };
 
-class BinaryExpression : public Expression {
-  public:
-    BinaryExpression(ExpressionPtr left, Token op, ExpressionPtr right);
+    class BinaryExpression : public Expression {
+      public:
+        BinaryExpression(ExpressionPtr left, tokenizer::Token op,
+                         ExpressionPtr right);
 
-    std::string accept(Visitor<std::string>& visitor) override;
+        std::string accept(Visitor<std::string>& visitor) override;
 
-  public:
-    ExpressionPtr left;
-    Token op;
-    ExpressionPtr right;
-};
+      public:
+        ExpressionPtr left;
+        tokenizer::Token op;
+        ExpressionPtr right;
+    };
 
-class GroupingExpression : public Expression {
-  public:
-    explicit GroupingExpression(ExpressionPtr expression);
+    class GroupingExpression : public Expression {
+      public:
+        explicit GroupingExpression(ExpressionPtr expression);
 
-    std::string accept(Visitor<std::string>& visitor) override;
+        std::string accept(Visitor<std::string>& visitor) override;
 
-  public:
-    ExpressionPtr expression;
-};
+      public:
+        ExpressionPtr expression;
+    };
 
-class LiteralExpression : public Expression {
-  public:
-    explicit LiteralExpression(Literal::variant_t literal);
+    class LiteralExpression : public Expression {
+      public:
+        explicit LiteralExpression(types::Literal::variant_t literal);
 
-    std::string accept(Visitor<std::string>& visitor) override;
+        std::string accept(Visitor<std::string>& visitor) override;
 
-  public:
-    Literal literal;
-};
+      public:
+        types::Literal literal;
+    };
 
-class UnaryExpression : public Expression {
-  public:
-    UnaryExpression(Token op, ExpressionPtr right);
+    class UnaryExpression : public Expression {
+      public:
+        UnaryExpression(tokenizer::Token op, ExpressionPtr right);
 
-    std::string accept(Visitor<std::string>& visitor) override;
+        std::string accept(Visitor<std::string>& visitor) override;
 
-  public:
-    Token op;
-    ExpressionPtr right;
-};
+      public:
+        tokenizer::Token op;
+        ExpressionPtr right;
+    };
 
-template <typename ReturnType> class Visitor {
-  public:
-    virtual ReturnType
-    visit_binary_expression(BinaryExpression& expression) = 0;
-    virtual ReturnType
-    visit_grouping_expression(GroupingExpression& expression) = 0;
-    virtual ReturnType
-    visit_literal_expression(LiteralExpression& expression) = 0;
-    virtual ReturnType visit_unary_expression(UnaryExpression& expression) = 0;
-};
+    template <typename ReturnType> class Visitor {
+      public:
+        virtual ReturnType
+        visit_binary_expression(BinaryExpression& expression) = 0;
+        virtual ReturnType
+        visit_grouping_expression(GroupingExpression& expression) = 0;
+        virtual ReturnType
+        visit_literal_expression(LiteralExpression& expression) = 0;
+        virtual ReturnType
+        visit_unary_expression(UnaryExpression& expression) = 0;
+    };
+} // namespace tek::parser
 
 #endif

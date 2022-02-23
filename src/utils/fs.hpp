@@ -8,6 +8,8 @@
 
 #include <fmt/format.h>
 
-[[nodiscard]] std::string read_file(const std::filesystem::path& path);
+namespace tek::fs {
+    [[nodiscard]] std::string read_file(const std::filesystem::path& path);
+} // namespace tek::fs
 
 #endif

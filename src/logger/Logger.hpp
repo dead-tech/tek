@@ -4,14 +4,16 @@
 #include <fmt/format.h>
 #include <string>
 
-class Logger {
-  public:
-    static bool had_error;
+namespace tek::logger {
+    class Logger {
+      public:
+        static bool had_error;
 
-  public:
-    static void report(const int line, const std::string& where,
-                       const std::string& message);
-    static void error(const int line, const std::string& message);
-};
+      public:
+        static void report(const std::size_t line, const std::string& where,
+                           const std::string& message);
+        static void error(const std::size_t line, const std::string& message);
+    };
+} // namespace tek::logger
 
 #endif
