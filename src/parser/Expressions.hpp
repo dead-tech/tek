@@ -15,7 +15,6 @@ namespace tek::parser {
         virtual std::string accept(Visitor<std::string>& visitor) = 0;
 
       protected:
-        // TODO: use unique_ptr
         using ExpressionPtr = std::unique_ptr<Expression>;
     };
 

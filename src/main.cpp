@@ -3,20 +3,26 @@
 #include <string>
 
 #include "logger/Logger.hpp"
+#include "parser/AstPrinter.hpp"
 #include "parser/Expressions.hpp"
-#include "tokenizer/Token.hpp"
+#include "parser/Parser.hpp"
 #include "tokenizer/Tokenizer.hpp"
 #include "utils/fs.hpp"
-
-void usage() { fmt::print("Usage: tek [file]\n"); }
 
 void run(const std::string& source_code) {
     tek::tokenizer::Tokenizer scanner(source_code);
     const auto tokens = scanner.tokenize();
 
-    for (const auto& token : tokens) {
-        fmt::print("{}\n", token.to_string());
+    tek::parser::Parser parser(tokens);
+    std::unique_ptr<tek::parser::Expression> expression = parser.parse();
+
+    if (tek::logger::Logger::had_error) {
+        fmt::print("Error!\n");
+        return;
     }
+
+    tek::parser::AstPrinter ast_printer;
+    fmt::print("{}\n", ast_printer.print(std::move(expression)));
 }
 
 void run_prompt() {
@@ -45,11 +51,9 @@ void run_file(const std::string& file_path) {
 
 int main(int argc, char** argv) {
     if (argc < 2) {
-        usage();
-    } else if (argc == 2) {
-        run_file(argv[1]);
-    } else {
         run_prompt();
+    } else {
+        run_file(argv[1]);
     }
     return 0;
 }

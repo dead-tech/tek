@@ -123,21 +123,7 @@ namespace tek::tokenizer {
     }
 
     std::string Token::to_string() const noexcept {
-        if (this->literal.type() == typeid(int)) {
-            return fmt::format(
-                "[\n\tLexeme: {},\n\tType: {},\n\tLiteral: {},\n\tLine: {},\n]",
-                this->lexeme, token_type_to_str(this->type),
-                std::any_cast<int>(this->literal), this->line);
-        } else if (this->literal.type() == typeid(std::string)) {
-            return fmt::format(
-                "[\n\tLexeme: {},\n\tType: {},\n\tLiteral: {},\n\tLine: {},\n]",
-                this->lexeme, token_type_to_str(this->type),
-                std::any_cast<std::string>(this->literal), this->line);
-        } else {
-            return fmt::format("[\n\tLexeme: {},\n\tType: {},\n\tLine: {},\n]",
-                               this->lexeme, token_type_to_str(this->type),
-                               this->line);
-        }
+        return this->literal.str();
     }
 
 } // namespace tek::tokenizer

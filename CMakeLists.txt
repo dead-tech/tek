@@ -13,13 +13,13 @@ set(COMPILER_WARNINGS
         -Wold-style-cast
         -Wunused
         -Wnull-dereference
-        -fsanitize=address,undefined
-)
+        -fsanitize=undefined
+        )
 
 file(GLOB_RECURSE SOURCES
         "src/*.cpp"
         "src/*.hpp"
-)
+        )
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(NO_OUTPUT_DIRS TARGETS)
@@ -33,7 +33,7 @@ option(ENABLE_TESTING "Enable the tests" ON)
 if (ENABLE_TESTING)
     file(GLOB_RECURSE TESTS
             "tests/*.cpp"
-    )
+            )
 
     list(REMOVE_ITEM TESTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/main.cpp")
 

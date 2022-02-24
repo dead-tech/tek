@@ -1,6 +1,7 @@
 #ifndef LOGGER_HPP
 #define LOGGER_HPP
 
+#include "../tokenizer/Token.hpp"
 #include <fmt/format.h>
 #include <string>
 
@@ -12,7 +13,8 @@ namespace tek::logger {
       public:
         static void report(const std::size_t line, const std::string& where,
                            const std::string& message);
-        static void error(const std::size_t line, const std::string& message);
+        static void error(const tokenizer::Token& token,
+                          const std::string& message);
     };
 } // namespace tek::logger
 

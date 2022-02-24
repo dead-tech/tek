@@ -15,12 +15,17 @@ namespace tek::types {
 
     struct Literal {
       public:
-        using variant_t = std::variant<double, std::string>;
+        using variant_t =
+            std::variant<double, std::string, bool, std::nullptr_t>;
 
       public:
         explicit Literal(variant_t literal);
-        [[nodiscard]] std::string get() const;
-        [[nodiscard]] std::string get();
+
+        [[nodiscard]] variant_t get() const;
+        [[nodiscard]] variant_t get();
+
+        [[nodiscard]] std::string str() const;
+        [[nodiscard]] std::string str();
 
       private:
         variant_t literal;

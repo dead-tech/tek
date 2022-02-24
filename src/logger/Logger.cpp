@@ -10,7 +10,12 @@ namespace tek::logger {
         Logger::had_error = true;
     }
 
-    void Logger::error(const std::size_t line, const std::string& message) {
-        report(line, "", message);
+    void Logger::error(const tokenizer::Token& token,
+                       const std::string& message) {
+        if (token.type == tokenizer::TokenType::ENDOF) {
+            report(token.line, "at the end", message);
+        } else {
+            report(token.line, "at '" + token.lexeme + "'", message);
+        }
     }
 } // namespace tek::logger

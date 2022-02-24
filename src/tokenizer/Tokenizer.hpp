@@ -29,7 +29,8 @@ namespace tek::tokenizer {
 
         void add_token(const TokenType type);
 
-        void add_token(const TokenType type, const std::any& literal);
+        void add_token(const TokenType type,
+                       const types::Literal::variant_t& literal);
 
         void string_literal();
 

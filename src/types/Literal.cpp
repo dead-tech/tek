@@ -4,17 +4,33 @@ namespace tek::types {
     Literal::Literal(Literal::variant_t literal)
         : literal{std::move(literal)} {}
 
-    std::string Literal::get() const {
+    Literal::variant_t Literal::get() const { return this->literal; }
+
+    Literal::variant_t Literal::get() { return this->literal; }
+
+    std::string Literal::str() const {
         ValueVisitor visitor{
-            [](double value) -> std::string { return std::to_string(value); },
-            [](const std::string& str) -> std::string { return str; }};
+            [](const double value) -> std::string {
+                return std::to_string(value);
+            },
+            [](const std::string& str) -> std::string { return str; },
+            [](const bool boolean) -> std::string {
+                return boolean ? "true" : "false";
+            },
+            [](const std::nullptr_t nil) -> std::string { return "nil"; }};
         return std::visit(visitor, literal);
     }
 
-    std::string Literal::get() {
+    std::string Literal::str() {
         ValueVisitor visitor{
-            [](double value) -> std::string { return std::to_string(value); },
-            [](const std::string& str) -> std::string { return str; }};
+            [](const double value) -> std::string {
+                return std::to_string(value);
+            },
+            [](const std::string& str) -> std::string { return str; },
+            [](const bool boolean) -> std::string {
+                return boolean ? "true" : "false";
+            },
+            [](const std::nullptr_t nil) -> std::string { return "nil"; }};
         return std::visit(visitor, literal);
     }
 } // namespace tek::types

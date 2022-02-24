@@ -1,5 +1,6 @@
 #ifndef TOKEN_HPP
 #define TOKEN_HPP
+#include "../types/Literal.hpp"
 #include <any>
 #include <cassert>
 #include <fmt/format.h>
@@ -63,11 +64,11 @@ namespace tek::tokenizer {
     struct Token {
         TokenType type;
         std::string lexeme;
-        std::any literal;
+        types::Literal literal;
         std::size_t line;
 
-        Token(const TokenType& type, std::string lexeme, std::any literal,
-              const size_t line)
+        Token(const TokenType& type, std::string lexeme,
+              types::Literal::variant_t literal, const size_t line)
             : type{type}, lexeme{std::move(lexeme)},
               literal{std::move(literal)}, line{line} {};
 

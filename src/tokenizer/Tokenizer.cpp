@@ -50,10 +50,11 @@ namespace tek::tokenizer {
     }
 
     void Tokenizer::add_token(const TokenType type) {
-        this->add_token(type, "");
+        this->add_token(type, types::Literal::variant_t{""});
     }
 
-    void Tokenizer::add_token(const TokenType type, const std::any& literal) {
+    void Tokenizer::add_token(const TokenType type,
+                              const types::Literal::variant_t& literal) {
         const auto lexeme =
             this->source.substr(this->start, this->current - this->start);
         this->tokens.emplace_back(type, lexeme, literal, this->line);
@@ -71,7 +72,8 @@ namespace tek::tokenizer {
 
         const auto string_literal = this->source.substr(
             this->start + 1, this->current - this->start - 2);
-        this->add_token(TokenType::STRING, string_literal);
+        this->add_token(TokenType::STRING,
+                        types::Literal::variant_t{string_literal});
     }
 
     void Tokenizer::number_literal() {
@@ -87,10 +89,10 @@ namespace tek::tokenizer {
 
         const auto str_number =
             this->source.substr(this->start, this->current - this->start);
-        int number{};
+        double number{};
         std::from_chars(str_number.data(),
                         str_number.data() + str_number.size(), number);
-        this->add_token(TokenType::NUMBER, number);
+        this->add_token(TokenType::NUMBER, types::Literal::variant_t{number});
     }
 
     void Tokenizer::identifier() {
@@ -185,7 +187,9 @@ namespace tek::tokenizer {
                 this->identifier();
             } else {
                 logger::Logger::error(
-                    this->line, fmt::format("Unexpected character: {}", c));
+                    Token(TokenType::ENDOF, "", types::Literal::variant_t{""},
+                          this->line),
+                    fmt::format("Unexpected character: {}", c));
             }
             break;
         }

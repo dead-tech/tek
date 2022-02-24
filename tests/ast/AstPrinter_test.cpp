@@ -1,7 +1,7 @@
 #include "../../src/parser/AstPrinter.hpp"
 #include <catch2/catch.hpp>
 
-TEST_CASE("AstPrinter test (fail)", "[single-file]") {
+TEST_CASE("AstPrinter test (succeed)", "[AstPrinter]") {
     tek::parser::AstPrinter ast_printer;
     std::unique_ptr<tek::parser::Expression> expression =
         std::make_unique<tek::parser::BinaryExpression>(

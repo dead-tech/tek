@@ -19,7 +19,7 @@ namespace tek::parser {
 
     std::string
     AstPrinter::visit_literal_expression(LiteralExpression& expression) {
-        return expression.literal.get();
+        return expression.literal.str();
     }
 
     std::string
