@@ -51,6 +51,5 @@ int main(int argc, char** argv) {
     } else {
         run_prompt();
     }
-
     return 0;
 }
