@@ -3,7 +3,6 @@
 #include <string>
 
 #include "logger/Logger.hpp"
-#include "parser/AstPrinter.hpp"
 #include "parser/Expressions.hpp"
 #include "tokenizer/Token.hpp"
 #include "tokenizer/Tokenizer.hpp"
@@ -44,7 +43,7 @@ void run_file(const std::string& file_path) {
     }
 }
 
-int main2(int argc, char** argv) {
+int main(int argc, char** argv) {
     if (argc < 2) {
         usage();
     } else if (argc == 2) {
@@ -54,18 +53,4 @@ int main2(int argc, char** argv) {
     }
 
     return 0;
-}
-
-int main() {
-    std::unique_ptr<tek::parser::Expression> expression =
-        std::make_unique<tek::parser::BinaryExpression>(
-            std::make_unique<tek::parser::UnaryExpression>(
-                tek::tokenizer::Token(tek::tokenizer::TokenType::MINUS, "-", "",
-                                      1),
-                std::make_unique<tek::parser::LiteralExpression>(123.0)),
-            tek::tokenizer::Token(tek::tokenizer::TokenType::STAR, "*", "", 1),
-            std::make_unique<tek::parser::GroupingExpression>(
-                std::make_unique<tek::parser::LiteralExpression>(45.67)));
-
-    fmt::print("{}\n", tek::parser::AstPrinter().print(std::move(expression)));
 }
