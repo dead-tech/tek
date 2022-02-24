@@ -23,8 +23,8 @@ jobs:
       run: brew install gcc@11
     - name: Set CXX=g++-11
       run: echo "CXX=g++-11" >> $GITHUB_ENV
-    - name: Set C=gcc-11
-      run: echo "C=gcc-11" >> $GITHUB_ENV
+    - name: Set CC=gcc-11
+      run: echo "CC=gcc-11" >> $GITHUB_ENV
     - name: Create default profile
       run: conan profile new default --detect
     - name: Update profile
