@@ -1,3 +1,4 @@
+![Build Status](https://github.com/Dead-tech/dead-lang/actions/workflows/linux.yml/badge.svg)
 # Tek
 
 Simple interpreter created following [**Crafting Interpreters**](https://craftinginterpreters.com/contents.html) book.
