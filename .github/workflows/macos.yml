@@ -15,7 +15,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Get Conan
-      id: conan
+      uses: turtlebrowser/get-conan@v1.0
     - name: Conan Version
       run: echo "${{ steps.conan.outputs.version}}"
     - name: Get latest G++/GCC version
