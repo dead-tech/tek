@@ -113,85 +113,85 @@ namespace tek::tokenizer {
     void Tokenizer::scan_token() {
         const char c = this->advance();
         switch (c) {
-        case '(': {
-            this->add_token(TokenType::LEFT_PAREN);
-            break;
-        }
-        case ')':
-            this->add_token(TokenType::RIGHT_PAREN);
-            break;
-        case '{':
-            this->add_token(TokenType::LEFT_BRACE);
-            break;
-        case '}':
-            this->add_token(TokenType::RIGHT_BRACE);
-            break;
-        case ',':
-            this->add_token(TokenType::COMMA);
-            break;
-        case '.':
-            this->add_token(TokenType::DOT);
-            break;
-        case '-':
-            this->add_token(TokenType::MINUS);
-            break;
-        case '+':
-            this->add_token(TokenType::PLUS);
-            break;
-        case ';':
-            this->add_token(TokenType::SEMICOLON);
-            break;
-        case '*':
-            this->add_token(TokenType::STAR);
-            break;
-        case '!':
-            this->add_token(match_next('=') ? TokenType::BANG_EQUAL
-                                            : TokenType::BANG);
-            break;
-        case '=':
-            this->add_token(match_next('=') ? TokenType::EQUAL_EQUAL
-                                            : TokenType::EQUAL);
-            break;
-        case '<':
-            this->add_token(match_next('=') ? TokenType::LESS_EQUAL
-                                            : TokenType::LESS);
-            break;
-        case '>':
-            this->add_token(match_next('=') ? TokenType::GREATER_EQUAL
-                                            : TokenType::GREATER);
-            break;
-        case '/':
-            if (this->match_next('/')) {
-                while (this->peek() == '\n' && !this->is_at_end()) {
-                    this->advance();
+            case '(': {
+                this->add_token(TokenType::LEFT_PAREN);
+                break;
+            }
+            case ')':
+                this->add_token(TokenType::RIGHT_PAREN);
+                break;
+            case '{':
+                this->add_token(TokenType::LEFT_BRACE);
+                break;
+            case '}':
+                this->add_token(TokenType::RIGHT_BRACE);
+                break;
+            case ',':
+                this->add_token(TokenType::COMMA);
+                break;
+            case '.':
+                this->add_token(TokenType::DOT);
+                break;
+            case '-':
+                this->add_token(TokenType::MINUS);
+                break;
+            case '+':
+                this->add_token(TokenType::PLUS);
+                break;
+            case ';':
+                this->add_token(TokenType::SEMICOLON);
+                break;
+            case '*':
+                this->add_token(TokenType::STAR);
+                break;
+            case '!':
+                this->add_token(match_next('=') ? TokenType::BANG_EQUAL
+                                                : TokenType::BANG);
+                break;
+            case '=':
+                this->add_token(match_next('=') ? TokenType::EQUAL_EQUAL
+                                                : TokenType::EQUAL);
+                break;
+            case '<':
+                this->add_token(match_next('=') ? TokenType::LESS_EQUAL
+                                                : TokenType::LESS);
+                break;
+            case '>':
+                this->add_token(match_next('=') ? TokenType::GREATER_EQUAL
+                                                : TokenType::GREATER);
+                break;
+            case '/':
+                if (this->match_next('/')) {
+                    while (this->peek() == '\n' && !this->is_at_end()) {
+                        this->advance();
+                    }
+                } else {
+                    this->add_token(TokenType::SLASH);
                 }
-            } else {
-                this->add_token(TokenType::SLASH);
-            }
-            break;
-        // Ignore whitespace character
-        case ' ':
-        case '\r':
-        case '\t':
-            break;
-        case '\n':
-            this->line++;
-            break;
-        case '"':
-            this->string_literal();
-            break;
-        default:
-            if (std::isdigit(c)) {
-                this->number_literal();
-            } else if (std::isalpha(c)) {
-                this->identifier();
-            } else {
-                logger::Logger::error(
-                    Token(TokenType::ENDOF, "", types::Literal::variant_t{""},
-                          this->line),
-                    fmt::format("Unexpected character: {}", c));
-            }
-            break;
+                break;
+            // Ignore whitespace character
+            case ' ':
+            case '\r':
+            case '\t':
+                break;
+            case '\n':
+                this->line++;
+                break;
+            case '"':
+                this->string_literal();
+                break;
+            default:
+                if (std::isdigit(c)) {
+                    this->number_literal();
+                } else if (std::isalpha(c)) {
+                    this->identifier();
+                } else {
+                    logger::Logger::error(
+                        Token(TokenType::ENDOF, "",
+                              types::Literal::variant_t{""}, this->line),
+                        fmt::format("Unexpected character: {}", c));
+                }
+                break;
         }
     }
 

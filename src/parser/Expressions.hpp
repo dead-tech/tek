@@ -8,11 +8,14 @@
 
 namespace tek::parser {
 
-    template <typename ReturnType> class Visitor;
+    template <typename ReturnType>
+    class Visitor;
 
     class Expression {
       public:
         virtual std::string accept(Visitor<std::string>& visitor) = 0;
+        virtual tek::types::Literal
+        accept(Visitor<tek::types::Literal>& visitor) = 0;
 
       protected:
         using ExpressionPtr = std::unique_ptr<Expression>;
@@ -24,6 +27,7 @@ namespace tek::parser {
                          ExpressionPtr right);
 
         std::string accept(Visitor<std::string>& visitor) override;
+        types::Literal accept(Visitor<types::Literal>& visitor) override;
 
       public:
         ExpressionPtr left;
@@ -36,6 +40,7 @@ namespace tek::parser {
         explicit GroupingExpression(ExpressionPtr expression);
 
         std::string accept(Visitor<std::string>& visitor) override;
+        types::Literal accept(Visitor<types::Literal>& visitor) override;
 
       public:
         ExpressionPtr expression;
@@ -46,6 +51,7 @@ namespace tek::parser {
         explicit LiteralExpression(types::Literal::variant_t literal);
 
         std::string accept(Visitor<std::string>& visitor) override;
+        types::Literal accept(Visitor<types::Literal>& visitor) override;
 
       public:
         types::Literal literal;
@@ -56,13 +62,15 @@ namespace tek::parser {
         UnaryExpression(tokenizer::Token op, ExpressionPtr right);
 
         std::string accept(Visitor<std::string>& visitor) override;
+        types::Literal accept(Visitor<types::Literal>& visitor) override;
 
       public:
         tokenizer::Token op;
         ExpressionPtr right;
     };
 
-    template <typename ReturnType> class Visitor {
+    template <typename ReturnType>
+    class Visitor {
       public:
         virtual ReturnType
         visit_binary_expression(BinaryExpression& expression) = 0;

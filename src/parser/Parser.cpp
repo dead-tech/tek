@@ -83,7 +83,7 @@ tek::parser::Parser::ExpressionPtr tek::parser::Parser::primary() {
     } else if (this->match({tokenizer::TokenType::NUMBER,
                             tokenizer::TokenType::STRING})) {
         return std::make_unique<LiteralExpression>(
-            this->previous().literal.get());
+            this->previous().literal.value());
     } else if (this->match({tokenizer::TokenType::LEFT_PAREN})) {
         auto expression = this->expression();
         this->consume(tokenizer::TokenType::RIGHT_PAREN,
@@ -142,7 +142,7 @@ tek::parser::Parser::consume(const tokenizer::TokenType& type,
     throw this->error(this->peek(), message);
 }
 
-exceptions::ParseError
+tek::exceptions::ParseError
 tek::parser::Parser::error(const tek::tokenizer::Token& token,
                            const std::string& message) {
     logger::Logger::error(token, message);
@@ -158,15 +158,15 @@ void tek::parser::Parser::synchronize() {
         }
 
         switch (this->peek().type) {
-        case tokenizer::TokenType::CLASS:
-        case tokenizer::TokenType::FUN:
-        case tokenizer::TokenType::VAR:
-        case tokenizer::TokenType::FOR:
-        case tokenizer::TokenType::IF:
-        case tokenizer::TokenType::WHILE:
-        case tokenizer::TokenType::PRINT:
-        case tokenizer::TokenType::RETURN:
-            return;
+            case tokenizer::TokenType::CLASS:
+            case tokenizer::TokenType::FUN:
+            case tokenizer::TokenType::VAR:
+            case tokenizer::TokenType::FOR:
+            case tokenizer::TokenType::IF:
+            case tokenizer::TokenType::WHILE:
+            case tokenizer::TokenType::PRINT:
+            case tokenizer::TokenType::RETURN:
+                return;
         }
         this->advance();
     }

@@ -6,7 +6,8 @@
 #include <vector>
 
 namespace tek::types {
-    template <typename... Visitors> struct ValueVisitor : Visitors... {
+    template <typename... Visitors>
+    struct ValueVisitor : Visitors... {
         using Visitors::operator()...;
     };
 
@@ -21,8 +22,8 @@ namespace tek::types {
       public:
         explicit Literal(variant_t literal);
 
-        [[nodiscard]] variant_t get() const;
-        [[nodiscard]] variant_t get();
+        [[nodiscard]] variant_t value() const;
+        [[nodiscard]] variant_t value();
 
         [[nodiscard]] std::string str() const;
         [[nodiscard]] std::string str();

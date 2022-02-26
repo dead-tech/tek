@@ -2,3 +2,7 @@ IndentWidth: 4
 DerivePointerAlignment: false
 PointerAlignment: Left
 NamespaceIndentation: All
+AlwaysBreakAfterDefinitionReturnType: None
+AlwaysBreakAfterReturnType: None
+IndentCaseLabels: true
+AlwaysBreakTemplateDeclarations: Yes

@@ -2,8 +2,8 @@
 #include <iostream>
 #include <string>
 
+#include "interpreter/Interpreter.hpp"
 #include "logger/Logger.hpp"
-#include "parser/AstPrinter.hpp"
 #include "parser/Expressions.hpp"
 #include "parser/Parser.hpp"
 #include "tokenizer/Tokenizer.hpp"
@@ -21,8 +21,13 @@ void run(const std::string& source_code) {
         return;
     }
 
-    tek::parser::AstPrinter ast_printer;
-    fmt::print("{}\n", ast_printer.print(std::move(expression)));
+    tek::interpreter::Interpreter interpreter;
+    interpreter.interpret(std::move(expression));
+
+    if (tek::logger::Logger::had_runtime_error) {
+        fmt::print("Runtime error\n");
+        std::exit(1);
+    }
 }
 
 void run_prompt() {

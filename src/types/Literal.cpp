@@ -4,9 +4,9 @@ namespace tek::types {
     Literal::Literal(Literal::variant_t literal)
         : literal{std::move(literal)} {}
 
-    Literal::variant_t Literal::get() const { return this->literal; }
+    Literal::variant_t Literal::value() const { return this->literal; }
 
-    Literal::variant_t Literal::get() { return this->literal; }
+    Literal::variant_t Literal::value() { return this->literal; }
 
     std::string Literal::str() const {
         ValueVisitor visitor{
