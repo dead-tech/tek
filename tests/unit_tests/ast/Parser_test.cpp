@@ -1,6 +1,6 @@
-#include "../../src/parser/AstPrinter.hpp"
-#include "../../src/parser/Parser.hpp"
-#include "../../src/tokenizer/Tokenizer.hpp"
+#include "../../../src/parser/AstPrinter.hpp"
+#include "../../../src/parser/Parser.hpp"
+#include "../../../src/tokenizer/Tokenizer.hpp"
 #include <catch2/catch.hpp>
 
 TEST_CASE("Parser parse expressions (succeed)", "[Parser]")

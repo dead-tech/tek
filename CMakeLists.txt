@@ -32,10 +32,8 @@ target_link_options(${PROJECT_NAME} PRIVATE ${COMPILER_WARNINGS})
 option(ENABLE_TESTING "Enable the tests" ON)
 if (ENABLE_TESTING)
     file(GLOB_RECURSE TESTS
-            "tests/*.cpp"
+            "tests/unit_tests/*.cpp"
             )
-
-    list(REMOVE_ITEM TESTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/main.cpp")
 
     add_library(tek_lib ${SOURCES})
     target_link_libraries(tek_lib CONAN_PKG::fmt)

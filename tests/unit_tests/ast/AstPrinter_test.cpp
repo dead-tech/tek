@@ -1,4 +1,4 @@
-#include "../../src/parser/AstPrinter.hpp"
+#include "../../../src/parser/AstPrinter.hpp"
 #include <catch2/catch.hpp>
 
 TEST_CASE("AstPrinter test (succeed)", "[AstPrinter]")
