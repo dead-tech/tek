@@ -154,7 +154,7 @@ void Interpreter::visit_block_statement(parser::BlockStatement &statement)
     this->execute_block(statement.statements, std::make_unique<Environment>(std::move(this->environment)));
 }
 
-bool Interpreter::is_truthy(const types::Literal::variant_t &value)
+constexpr bool Interpreter::is_truthy(const types::Literal::variant_t &value)
 {
     if (std::holds_alternative<std::nullptr_t>(value)) {
         return false;
@@ -165,7 +165,7 @@ bool Interpreter::is_truthy(const types::Literal::variant_t &value)
     }
 }
 
-bool Interpreter::is_equal(const types::Literal::variant_t &left, const types::Literal::variant_t &right)
+constexpr bool Interpreter::is_equal(const types::Literal::variant_t &left, const types::Literal::variant_t &right)
 {
     if (variants::have_type_of<std::nullptr_t>(left, right)) {
         return true;

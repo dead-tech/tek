@@ -43,8 +43,9 @@ class Interpreter
     void execute(const StatementPtr &statement);
     void execute_block(const StatementsVec &statements, const EnvironmentPtr &environment);
 
-    [[nodiscard]] static bool is_truthy(const types::Literal::variant_t &value);
-    [[nodiscard]] static bool is_equal(const types::Literal::variant_t &left, const types::Literal::variant_t &right);
+    [[nodiscard]] constexpr static bool is_truthy(const types::Literal::variant_t &value);
+    [[nodiscard]] constexpr static bool is_equal(const types::Literal::variant_t &left,
+      const types::Literal::variant_t                                            &right);
 
     template<typename AssertType, typename... Variants>
     constexpr void assert_operand_types(const tokenizer::Token &op, Variants &&...variants);

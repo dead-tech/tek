@@ -56,7 +56,7 @@ class Parser
 
     void synchronize();
 
-    exceptions::ParseError error(const tokenizer::Token &token, const std::string &message);
+    static exceptions::ParseError error(const tokenizer::Token &token, const std::string &message);
 
   private:
     TokensVec   tokens;

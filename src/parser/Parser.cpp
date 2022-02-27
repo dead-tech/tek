@@ -32,7 +32,7 @@ Parser::ExpressionPtr Parser::assignment()
             return std::make_unique<AssignExpression>(var_expr->name, std::move(value));
         }
 
-        this->error(equals, "Invalid assignment target.");
+        Parser::error(equals, "Invalid assignment target.");
     }
 
     return expression;
@@ -106,7 +106,7 @@ Parser::ExpressionPtr Parser::primary()
         return std::make_unique<VarExpression>(this->previous());
     }
 
-    throw this->error(this->peek(), "Expected expression.");
+    throw Parser::error(this->peek(), "Expected expression.");
 }
 
 Parser::StatementPtr Parser::statement()
@@ -192,24 +192,24 @@ bool Parser::check(const tokenizer::TokenType &type) { return !this->is_at_end()
 
 bool Parser::is_at_end() { return this->peek().type == tokenizer::TokenType::ENDOF; }
 
-tek::tokenizer::Token Parser::advance()
+tokenizer::Token Parser::advance()
 {
     if (!this->is_at_end()) { this->current++; }
     return this->previous();
 }
 
-tek::tokenizer::Token Parser::peek() { return this->tokens.at(this->current); }
+tokenizer::Token Parser::peek() { return this->tokens.at(this->current); }
 
-tek::tokenizer::Token Parser::previous() { return this->tokens.at(this->current - 1); }
+tokenizer::Token Parser::previous() { return this->tokens.at(this->current - 1); }
 
-tek::tokenizer::Token Parser::consume(const tokenizer::TokenType &type, const std::string &message)
+tokenizer::Token Parser::consume(const tokenizer::TokenType &type, const std::string &message)
 {
     if (this->check(type)) { return this->advance(); }
 
-    throw this->error(this->peek(), message);
+    throw Parser::error(this->peek(), message);
 }
 
-tek::exceptions::ParseError Parser::error(const tek::tokenizer::Token &token, const std::string &message)
+exceptions::ParseError Parser::error(const tokenizer::Token &token, const std::string &message)
 {
     logger::Logger::error(token, message);
     throw exceptions::ParseError();
@@ -248,4 +248,4 @@ std::optional<Parser::StatementsVec> Parser::parse()
 
     return out;
 }
-};// namespace tek::parser
+}// namespace tek::parser
