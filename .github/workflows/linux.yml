@@ -14,6 +14,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+    - uses: actions/setup-python@v2
+      with:
+        python-version: '3.9'
     - name: Get Conan
       id: conan
       uses: turtlebrowser/get-conan@v1.0
@@ -37,3 +40,5 @@ jobs:
       run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
     - name: Run tests
       run: ${{github.workspace}}/build/tests
+    - name: Run Examples
+      run: python ${{github.workspace}}/tests/run_examples.py
