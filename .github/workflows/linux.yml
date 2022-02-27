@@ -1,4 +1,4 @@
-name: Linux
+name: Build and Test (Linux)
 
 on:
   push:
@@ -10,35 +10,35 @@ env:
   BUILD_TYPE: Release
 
 jobs:
-  build-linux:
+  build-test-linux:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-python@v2
-      with:
-        python-version: '3.9'
-    - name: Get Conan
-      id: conan
-      uses: turtlebrowser/get-conan@v1.0
-    - name: Conan Version
-      run: echo "${{ steps.conan.outputs.version}}"
-    - name: Get Latest G++/GCC version
-      run: sudo apt install gcc-11 g++-11
-    - name: Set CXX=g++-11
-      run: echo "CXX=g++-11" >> $GITHUB_ENV
-    - name: Set CC=gcc-11
-      run: echo "CC=gcc-11" >> $GITHUB_ENV
-    - name: Create default profile
-      run: conan profile new default --detect
-    - name: Update profile
-      run: conan profile update settings.compiler.libcxx=libstdc++11 default
-    - name: Install dependencies
-      run: conan install . -s build_type=${{env.BUILD_TYPE}} --install-folder=${{github.workspace}}/build
-    - name: Configure CMake
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
-    - name: Build
-      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
-    - name: Run tests
-      run: ${{github.workspace}}/build/tests
-    - name: Run Examples
-      run: python ${{github.workspace}}/tests/run_examples.py
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+      - name: Get Conan
+        id: conan
+        uses: turtlebrowser/get-conan@v1.0
+      - name: Conan Version
+        run: echo "${{ steps.conan.outputs.version}}"
+      - name: Get Latest G++/GCC version
+        run: sudo apt install gcc-11 g++-11
+      - name: Set CXX=g++-11
+        run: echo "CXX=g++-11" >> $GITHUB_ENV
+      - name: Set CC=gcc-11
+        run: echo "CC=gcc-11" >> $GITHUB_ENV
+      - name: Create default profile
+        run: conan profile new default --detect
+      - name: Update profile
+        run: conan profile update settings.compiler.libcxx=libstdc++11 default
+      - name: Install dependencies
+        run: conan install . -s build_type=${{env.BUILD_TYPE}} --install-folder=${{github.workspace}}/build
+      - name: Configure CMake
+        run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+      - name: Build
+        run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+      - name: Run tests
+        run: ${{github.workspace}}/build/tests
+      - name: Run Examples
+        run: python ${{github.workspace}}/tests/run_examples.py
