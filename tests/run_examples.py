@@ -59,7 +59,7 @@ def run_examples(examples: list[str]) -> None:
             expected_result: str = last_line.rsplit('e', 1)[-1].strip()
             result = subprocess.run(['./tek', example], capture_output=True)
 
-            if expected_result == 'fail':
+            if expected_result == '(fail)':
                 try:
                     assert(result.returncode != 0)
                     print(f'[TEST] {filename}...SUCCESS')
@@ -67,6 +67,7 @@ def run_examples(examples: list[str]) -> None:
                     print(f'[ERROR] Test {filename} FAILED')
                     print(f'[INFO] Test was supposed to fail but exit code was {result.returncode}')  # noqa: E501
                     print_results(result, expected_result)
+                    sys.exit(1)
                 continue
 
             try:
@@ -75,6 +76,7 @@ def run_examples(examples: list[str]) -> None:
             except AssertionError:
                 print(f'[ERROR] Test {filename} FAILED')
                 print_results(result, expected_result)
+                sys.exit(1)
 
 
 def main() -> int:
