@@ -159,6 +159,7 @@ void Parser::synchronize()
 std::optional<Parser::ExpressionPtr> Parser::parse()
 {
     try {
+        if (this->is_at_end()) { return std::nullopt; }
         return this->expression();
     } catch (const exceptions::ParseError &error) {
         return std::nullopt;
