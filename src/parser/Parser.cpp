@@ -1,10 +1,12 @@
 #include "Parser.hpp"
 
-tek::parser::Parser::Parser(tek::parser::Parser::TokensVec tokens) : tokens{ std::move(tokens) }, current{ 0 } {}
+namespace tek::parser {
 
-tek::parser::Parser::ExpressionPtr tek::parser::Parser::expression() { return this->equality(); }
+Parser::Parser(Parser::TokensVec tokens) : tokens{ std::move(tokens) }, current{ 0 } {}
 
-tek::parser::Parser::ExpressionPtr tek::parser::Parser::equality()
+Parser::ExpressionPtr Parser::expression() { return this->equality(); }
+
+Parser::ExpressionPtr Parser::equality()
 {
     auto left = this->comparison();
 
@@ -18,7 +20,7 @@ tek::parser::Parser::ExpressionPtr tek::parser::Parser::equality()
     return left;
 }
 
-tek::parser::Parser::ExpressionPtr tek::parser::Parser::comparison()
+Parser::ExpressionPtr Parser::comparison()
 {
     auto left = this->term();
 
@@ -33,7 +35,7 @@ tek::parser::Parser::ExpressionPtr tek::parser::Parser::comparison()
     return left;
 }
 
-tek::parser::Parser::ExpressionPtr tek::parser::Parser::term()
+Parser::ExpressionPtr Parser::term()
 {
     auto left = this->factor();
 
@@ -45,7 +47,7 @@ tek::parser::Parser::ExpressionPtr tek::parser::Parser::term()
     return left;
 }
 
-tek::parser::Parser::ExpressionPtr tek::parser::Parser::factor()
+Parser::ExpressionPtr Parser::factor()
 {
     auto left = this->unary();
 
@@ -57,7 +59,7 @@ tek::parser::Parser::ExpressionPtr tek::parser::Parser::factor()
     return left;
 }
 
-tek::parser::Parser::ExpressionPtr tek::parser::Parser::unary()
+Parser::ExpressionPtr Parser::unary()
 {
     if (this->match({ tokenizer::TokenType::BANG, tokenizer::TokenType::MINUS })) {
         const auto op    = this->previous();
@@ -68,7 +70,7 @@ tek::parser::Parser::ExpressionPtr tek::parser::Parser::unary()
     return this->primary();
 }
 
-tek::parser::Parser::ExpressionPtr tek::parser::Parser::primary()
+Parser::ExpressionPtr Parser::primary()
 {
     if (this->match({ tokenizer::TokenType::FALSE })) {
         return std::make_unique<LiteralExpression>(false);
@@ -87,7 +89,7 @@ tek::parser::Parser::ExpressionPtr tek::parser::Parser::primary()
     throw this->error(this->peek(), "Expected expression.");
 }
 
-bool tek::parser::Parser::match(const std::vector<tokenizer::TokenType> &types)
+bool Parser::match(const std::vector<tokenizer::TokenType> &types)
 {
     for (const auto &type : types) {
         if (this->check(type)) {
@@ -98,7 +100,7 @@ bool tek::parser::Parser::match(const std::vector<tokenizer::TokenType> &types)
     return false;
 }
 
-bool tek::parser::Parser::check(const tokenizer::TokenType &type)
+bool Parser::check(const tokenizer::TokenType &type)
 {
     if (this->is_at_end()) {
         return false;
@@ -107,32 +109,32 @@ bool tek::parser::Parser::check(const tokenizer::TokenType &type)
     }
 }
 
-bool tek::parser::Parser::is_at_end() { return this->peek().type == tokenizer::TokenType::ENDOF; }
+bool Parser::is_at_end() { return this->peek().type == tokenizer::TokenType::ENDOF; }
 
-tek::tokenizer::Token tek::parser::Parser::advance()
+tek::tokenizer::Token Parser::advance()
 {
     if (!this->is_at_end()) { this->current++; }
     return this->previous();
 }
 
-tek::tokenizer::Token tek::parser::Parser::peek() { return this->tokens.at(this->current); }
+tek::tokenizer::Token Parser::peek() { return this->tokens.at(this->current); }
 
-tek::tokenizer::Token tek::parser::Parser::previous() { return this->tokens.at(this->current - 1); }
+tek::tokenizer::Token Parser::previous() { return this->tokens.at(this->current - 1); }
 
-tek::tokenizer::Token tek::parser::Parser::consume(const tokenizer::TokenType &type, const std::string &message)
+tek::tokenizer::Token Parser::consume(const tokenizer::TokenType &type, const std::string &message)
 {
     if (this->check(type)) { return this->advance(); }
 
     throw this->error(this->peek(), message);
 }
 
-tek::exceptions::ParseError tek::parser::Parser::error(const tek::tokenizer::Token &token, const std::string &message)
+tek::exceptions::ParseError Parser::error(const tek::tokenizer::Token &token, const std::string &message)
 {
     logger::Logger::error(token, message);
     throw exceptions::ParseError();
 }
 
-void tek::parser::Parser::synchronize()
+void Parser::synchronize()
 {
     this->advance();
 
@@ -153,11 +155,13 @@ void tek::parser::Parser::synchronize()
         this->advance();
     }
 }
-tek::parser::Parser::ExpressionPtr tek::parser::Parser::parse()
+
+std::optional<Parser::ExpressionPtr> Parser::parse()
 {
     try {
         return this->expression();
     } catch (const exceptions::ParseError &error) {
-        return nullptr;
+        return std::nullopt;
     }
 }
+};// namespace tek::parser

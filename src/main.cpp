@@ -14,8 +14,10 @@ void run(const std::string &source_code)
     tek::tokenizer::Tokenizer scanner(source_code);
     const auto                tokens = scanner.tokenize();
 
-    tek::parser::Parser                      parser(tokens);
-    std::unique_ptr<tek::parser::Expression> expression = parser.parse();
+    tek::parser::Parser parser(tokens);
+    auto                expression = parser.parse();
+
+    if (!expression) { return; }
 
     if (tek::logger::Logger::had_error) {
         fmt::print("Error!\n");
@@ -23,7 +25,7 @@ void run(const std::string &source_code)
     }
 
     tek::interpreter::Interpreter interpreter;
-    interpreter.interpret(std::move(expression));
+    interpreter.interpret(std::move(*expression));
 
     if (tek::logger::Logger::had_runtime_error) {
         fmt::print("Runtime error\n");

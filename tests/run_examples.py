@@ -39,6 +39,14 @@ def find_examples() -> list[str]:
     return out
 
 
+def print_results(
+    actual_result: subprocess.CompletedProcess,
+    expected_result: str,
+) -> None:
+    print(f'[NOTE] Got: {actual_result.stdout.decode().strip().encode()}')
+    print(f'[NOTE] Expected: {expected_result.encode()}')
+
+
 def run_examples(examples: list[str]) -> None:
     if not os.getcwd().endswith('/build'):
         os.chdir(BUILD_PATH)
@@ -58,6 +66,7 @@ def run_examples(examples: list[str]) -> None:
                 except AssertionError:
                     print(f'[ERROR] Test {filename} FAILED')
                     print(f'[INFO] Test was supposed to fail but exit code was {result.returncode}')  # noqa: E501
+                    print_results(result, expected_result)
                 continue
 
             try:
@@ -65,9 +74,7 @@ def run_examples(examples: list[str]) -> None:
                 print(f'[TEST] {filename}...SUCCESS')
             except AssertionError:
                 print(f'[ERROR] Test {filename} FAILED')
-                print(f'[NOTE] Got: {result.stdout.decode().strip().encode()}')
-                print(f'[NOTE] Expected: {expected_result.encode()}')
-            check_exit_code(result, f'{example} had non zero exit code')
+                print_results(result, expected_result)
 
 
 def main() -> int:
