@@ -139,7 +139,7 @@ void Tokenizer::scan_token()
         break;
     case '/':
         if (this->match_next('/')) {
-            while (this->peek() == '\n' && !this->is_at_end()) { this->advance(); }
+            while (this->peek() != '\n' && !this->is_at_end()) { this->advance(); }
         } else {
             this->add_token(TokenType::SLASH);
         }

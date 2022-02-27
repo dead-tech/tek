@@ -5,6 +5,7 @@
 #include "../logger/Logger.hpp"
 #include "../tokenizer/Token.hpp"
 #include "Expressions.hpp"
+#include <optional>
 #include <utility>
 #include <vector>
 
@@ -17,7 +18,7 @@ class Parser
 
   public:
     explicit Parser(TokensVec tokens);
-    [[nodiscard]] ExpressionPtr parse();
+    [[nodiscard]] std::optional<ExpressionPtr> parse();
 
   private:
     [[nodiscard]] ExpressionPtr expression();
