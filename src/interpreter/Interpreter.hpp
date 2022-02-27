@@ -6,6 +6,7 @@
 #include "../parser/Expressions.hpp"
 #include "../types/Literal.hpp"
 #include "../utils/traits.hpp"
+#include "../utils/variants.hpp"
 
 namespace tek::interpreter {
     class Interpreter : public parser::Visitor<types::Literal> {
@@ -27,31 +28,17 @@ namespace tek::interpreter {
       private:
         [[nodiscard]] types::Literal evaluate(const ExpressionPtr& expression);
 
-        [[nodiscard]] bool is_truthy(const types::Literal::variant_t& value);
-        [[nodiscard]] bool is_equal(const types::Literal::variant_t& left,
-                                    const types::Literal::variant_t& right);
-        template <typename Type>
-        constexpr void
-        assert_operand_type(const tokenizer::Token& op,
-                            const types::Literal::variant_t& operand);
+        [[nodiscard]] static bool
+        is_truthy(const types::Literal::variant_t& value);
+        [[nodiscard]] static bool
+        is_equal(const types::Literal::variant_t& left,
+                 const types::Literal::variant_t& right);
 
-        template <typename Type>
-        constexpr void
-        assert_operand_types(const tokenizer::Token& op,
-                             const types::Literal::variant_t& left,
-                             const types::Literal::variant_t& right);
+        template <typename AssertType, typename... Variants>
+        constexpr void assert_operand_types(const tokenizer::Token& op,
+                                            Variants&&... variants);
 
-        template <typename Type>
-        [[nodiscard]] constexpr bool
-        have_type_of(const types::Literal::variant_t& left,
-                     const types::Literal::variant_t& right);
-        template <typename Type>
-        [[nodiscard]] std::tuple<Type, Type>
-        get_values(const types::Literal::variant_t& left,
-                   const types::Literal::variant_t& right);
-
-        [[nodiscard]] std::string
-        stringify(const types::Literal::variant_t& value);
+        [[nodiscard]] static std::string stringify(const types::Literal& value);
     };
 } // namespace tek::interpreter
 
