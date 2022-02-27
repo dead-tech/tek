@@ -11,6 +11,7 @@ void Environment::define(const std::string &name, const tek::types::Literal &ini
     this->variables.emplace(name, initializer);
 }
 
+// TODO: abstract out finding if the key exists
 types::Literal Environment::get(const tokenizer::Token &name)
 {
     const auto it = this->variables.find(name.lexeme);

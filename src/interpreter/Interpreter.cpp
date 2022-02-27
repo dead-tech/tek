@@ -59,7 +59,7 @@ types::Literal Interpreter::visit_binary_expression(parser::BinaryExpression &ex
     const auto right = this->evaluate(expression.right).value();
     const auto left  = this->evaluate(expression.left).value();
 
-    // TODO: Abstract this out in some way.
+    // TODO: Create a method for each op
     switch (expression.op.type) {
     case tokenizer::TokenType::MINUS: {
         this->assert_operand_types<double>(expression.op, left, right);
@@ -173,7 +173,6 @@ bool Interpreter::is_equal(const types::Literal::variant_t &left, const types::L
         return false;
     }
 
-    // This might be a problem, or maybe not
     return left == right;
 }
 

@@ -40,7 +40,12 @@ class Parser
     [[nodiscard]] StatementPtr  var_statement();
     [[nodiscard]] StatementsVec block_statement();
 
-    bool match(const std::vector<tokenizer::TokenType> &types);
+    template<typename Match>
+    [[nodiscard]] constexpr bool match(Match &&match);
+
+    template<typename... Matches>
+    [[nodiscard]] constexpr bool match(Matches &&...matches);
+
     bool check(const tokenizer::TokenType &type);
     bool is_at_end();
 

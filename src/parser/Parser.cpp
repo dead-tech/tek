@@ -10,7 +10,7 @@ Parser::ExpressionPtr Parser::equality()
 {
     auto left = this->comparison();
 
-    while (match({ tokenizer::TokenType::BANG_EQUAL, tokenizer::TokenType::EQUAL_EQUAL })) {
+    while (this->match(tokenizer::TokenType::BANG_EQUAL, tokenizer::TokenType::EQUAL_EQUAL)) {
         const auto op    = this->previous();
         auto       right = this->comparison();
 
@@ -24,7 +24,7 @@ Parser::ExpressionPtr Parser::assignment()
 {
     auto expression = this->equality();
 
-    if (this->match({ tokenizer::TokenType::EQUAL })) {
+    if (this->match(tokenizer::TokenType::EQUAL)) {
         const auto equals = this->previous();
         auto       value  = this->assignment();
 
@@ -42,10 +42,10 @@ Parser::ExpressionPtr Parser::comparison()
 {
     auto left = this->term();
 
-    while (this->match({ tokenizer::TokenType::GREATER,
+    while (this->match(tokenizer::TokenType::GREATER,
       tokenizer::TokenType::GREATER_EQUAL,
       tokenizer::TokenType::LESS,
-      tokenizer::TokenType::LESS_EQUAL })) {
+      tokenizer::TokenType::LESS_EQUAL)) {
         const auto op    = this->previous();
         auto       right = this->term();
         left             = std::make_unique<BinaryExpression>(std::move(left), op, std::move(right));
@@ -57,7 +57,7 @@ Parser::ExpressionPtr Parser::term()
 {
     auto left = this->factor();
 
-    while (this->match({ tokenizer::TokenType::MINUS, tokenizer::TokenType::PLUS })) {
+    while (this->match(tokenizer::TokenType::MINUS, tokenizer::TokenType::PLUS)) {
         const auto op    = this->previous();
         auto       right = this->factor();
         left             = std::make_unique<BinaryExpression>(std::move(left), op, std::move(right));
@@ -69,7 +69,7 @@ Parser::ExpressionPtr Parser::factor()
 {
     auto left = this->unary();
 
-    while (this->match({ tokenizer::TokenType::SLASH, tokenizer::TokenType::STAR })) {
+    while (this->match(tokenizer::TokenType::SLASH, tokenizer::TokenType::STAR)) {
         const auto op    = this->previous();
         auto       right = this->unary();
         left             = std::make_unique<BinaryExpression>(std::move(left), op, std::move(right));
@@ -79,7 +79,7 @@ Parser::ExpressionPtr Parser::factor()
 
 Parser::ExpressionPtr Parser::unary()
 {
-    if (this->match({ tokenizer::TokenType::BANG, tokenizer::TokenType::MINUS })) {
+    if (this->match(tokenizer::TokenType::BANG, tokenizer::TokenType::MINUS)) {
         const auto op    = this->previous();
         auto       right = this->unary();
         return std::make_unique<UnaryExpression>(op, std::move(right));
@@ -90,19 +90,19 @@ Parser::ExpressionPtr Parser::unary()
 
 Parser::ExpressionPtr Parser::primary()
 {
-    if (this->match({ tokenizer::TokenType::FALSE })) {
+    if (this->match(tokenizer::TokenType::FALSE)) {
         return std::make_unique<LiteralExpression>(false);
-    } else if (this->match({ tokenizer::TokenType::TRUE })) {
+    } else if (this->match(tokenizer::TokenType::TRUE)) {
         return std::make_unique<LiteralExpression>(true);
-    } else if (this->match({ tokenizer::TokenType::TRUE })) {
+    } else if (this->match(tokenizer::TokenType::NIL)) {
         return std::make_unique<LiteralExpression>(nullptr);
-    } else if (this->match({ tokenizer::TokenType::NUMBER, tokenizer::TokenType::STRING })) {
+    } else if (this->match(tokenizer::TokenType::NUMBER, tokenizer::TokenType::STRING)) {
         return std::make_unique<LiteralExpression>(this->previous().literal.value());
-    } else if (this->match({ tokenizer::TokenType::LEFT_PAREN })) {
+    } else if (this->match(tokenizer::TokenType::LEFT_PAREN)) {
         auto expression = this->expression();
         this->consume(tokenizer::TokenType::RIGHT_PAREN, "Expect ')' after expression");
         return std::make_unique<GroupingExpression>(std::move(expression));
-    } else if (this->match({ tokenizer::TokenType::IDENTIFIER })) {
+    } else if (this->match(tokenizer::TokenType::IDENTIFIER)) {
         return std::make_unique<VarExpression>(this->previous());
     }
 
@@ -111,8 +111,8 @@ Parser::ExpressionPtr Parser::primary()
 
 Parser::StatementPtr Parser::statement()
 {
-    if (this->match({ tokenizer::TokenType::PRINT })) { return this->print_statement(); }
-    if (this->match({ tokenizer::TokenType::LEFT_BRACE })) {
+    if (this->match(tokenizer::TokenType::PRINT)) { return this->print_statement(); }
+    if (this->match(tokenizer::TokenType::LEFT_BRACE)) {
         return std::make_unique<BlockStatement>(this->block_statement());
     }
 
@@ -122,7 +122,7 @@ Parser::StatementPtr Parser::statement()
 Parser::StatementPtr Parser::declaration()
 {
     try {
-        if (this->match({ tokenizer::TokenType::VAR })) { return this->var_statement(); }
+        if (this->match(tokenizer::TokenType::VAR)) { return this->var_statement(); }
 
         return this->statement();
     } catch (const exceptions::RuntimeError &error) {
@@ -153,7 +153,7 @@ Parser::StatementPtr Parser::var_statement()
 
     ExpressionPtr initializer = nullptr;
 
-    if (this->match({ tokenizer::TokenType::EQUAL })) { initializer = this->expression(); }
+    if (this->match(tokenizer::TokenType::EQUAL)) { initializer = this->expression(); }
 
     this->consume(tokenizer::TokenType::SEMICOLON, "Expected semicolon after variable declaration.");
 
@@ -172,25 +172,23 @@ Parser::StatementsVec Parser::block_statement()
     return out;
 }
 
-bool Parser::match(const std::vector<tokenizer::TokenType> &types)
+template<typename Match>
+constexpr bool Parser::match(Match &&match)
 {
-    for (const auto &type : types) {
-        if (this->check(type)) {
-            this->advance();
-            return true;
-        }
+    if (this->check(std::forward<Match>(match))) {
+        this->advance();
+        return true;
     }
     return false;
 }
 
-bool Parser::check(const tokenizer::TokenType &type)
+template<typename... Matches>
+constexpr bool Parser::match(Matches &&...matches)
 {
-    if (this->is_at_end()) {
-        return false;
-    } else {
-        return this->peek().type == type;
-    }
+    return (match(std::forward<Matches>(matches)) || ...);
 }
+
+bool Parser::check(const tokenizer::TokenType &type) { return !this->is_at_end() && this->peek().type == type; }
 
 bool Parser::is_at_end() { return this->peek().type == tokenizer::TokenType::ENDOF; }
 

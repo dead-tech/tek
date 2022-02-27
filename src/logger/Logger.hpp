@@ -10,6 +10,7 @@ namespace tek::logger {
 class Logger
 {
   public:
+    // TODO: Do something about these maybe?
     static bool had_error;
     static bool had_runtime_error;
 
