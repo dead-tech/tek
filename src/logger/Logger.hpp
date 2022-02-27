@@ -7,18 +7,17 @@
 #include <string>
 
 namespace tek::logger {
-    class Logger {
-      public:
-        static bool had_error;
-        static bool had_runtime_error;
+class Logger
+{
+  public:
+    static bool had_error;
+    static bool had_runtime_error;
 
-      public:
-        static void report(const std::size_t line, const std::string& where,
-                           const std::string& message);
-        static void error(const tokenizer::Token& token,
-                          const std::string& message);
-        static void runtime_error(const exceptions::RuntimeError& error);
-    };
-} // namespace tek::logger
+  public:
+    static void report(const std::size_t line, const std::string &where, const std::string &message);
+    static void error(const tokenizer::Token &token, const std::string &message);
+    static void runtime_error(const exceptions::RuntimeError &error);
+};
+}// namespace tek::logger
 
 #endif

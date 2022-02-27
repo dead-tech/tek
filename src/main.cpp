@@ -9,11 +9,12 @@
 #include "tokenizer/Tokenizer.hpp"
 #include "utils/fs.hpp"
 
-void run(const std::string& source_code) {
+void run(const std::string &source_code)
+{
     tek::tokenizer::Tokenizer scanner(source_code);
-    const auto tokens = scanner.tokenize();
+    const auto                tokens = scanner.tokenize();
 
-    tek::parser::Parser parser(tokens);
+    tek::parser::Parser                      parser(tokens);
     std::unique_ptr<tek::parser::Expression> expression = parser.parse();
 
     if (tek::logger::Logger::had_error) {
@@ -30,31 +31,29 @@ void run(const std::string& source_code) {
     }
 }
 
-void run_prompt() {
+void run_prompt()
+{
     std::string input;
     while (true) {
         fmt::print("> ");
         std::getline(std::cin, input);
 
-        if (std::cin.fail() || std::cin.eof()) {
-            break;
-        }
+        if (std::cin.fail() || std::cin.eof()) { break; }
 
         run(input);
     }
 }
 
-void run_file(const std::string& file_path) {
-    const auto source_code =
-        tek::fs::read_file(std::filesystem::path(file_path));
+void run_file(const std::string &file_path)
+{
+    const auto source_code = tek::fs::read_file(std::filesystem::path(file_path));
     run(source_code);
 
-    if (tek::logger::Logger::had_error) {
-        exit(1);
-    }
+    if (tek::logger::Logger::had_error) { exit(1); }
 }
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv)
+{
     if (argc < 2) {
         run_prompt();
     } else {
