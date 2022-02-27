@@ -8,7 +8,7 @@
 #include <vector>
 
 namespace tek::parser {
-class AstPrinter : public Visitor<std::string>
+class AstPrinter : public ExpressionVisitor<std::string>
 {
   private:
     using ExpressionPtr = std::unique_ptr<Expression>;

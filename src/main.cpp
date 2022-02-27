@@ -9,23 +9,24 @@
 #include "tokenizer/Tokenizer.hpp"
 #include "utils/fs.hpp"
 
+static tek::interpreter::Interpreter interpreter;
+
 void run(const std::string &source_code)
 {
     tek::tokenizer::Tokenizer scanner(source_code);
     const auto                tokens = scanner.tokenize();
 
     tek::parser::Parser parser(tokens);
-    auto                expression = parser.parse();
+    auto                statements = parser.parse();
 
-    if (!expression) { return; }
+    if (!statements) { return; }
 
     if (tek::logger::Logger::had_error) {
         fmt::print("Error!\n");
         return;
     }
 
-    tek::interpreter::Interpreter interpreter;
-    interpreter.interpret(std::move(*expression));
+    interpreter.interpret(*statements);
 
     if (tek::logger::Logger::had_runtime_error) {
         fmt::print("Runtime error\n");

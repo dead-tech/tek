@@ -1,11 +1,10 @@
 #include "Interpreter.hpp"
 
 namespace tek::interpreter {
-void Interpreter::interpret(Interpreter::ExpressionPtr expression)
+void Interpreter::interpret(const Interpreter::StatementsVec &statements)
 {
     try {
-        const auto value = this->evaluate(expression);
-        fmt::print("{}\n", tek::interpreter::Interpreter::stringify(value));
+        for (const auto &statement : statements) { this->execute(statement); }
     } catch (const exceptions::RuntimeError &error) {
         logger::Logger::runtime_error(error);
     }
@@ -21,7 +20,21 @@ types::Literal Interpreter::visit_grouping_expression(parser::GroupingExpression
     return this->evaluate(expression.expression);
 }
 
-types::Literal Interpreter::evaluate(const Interpreter::ExpressionPtr &expression) { return expression->accept(*this); }
+types::Literal Interpreter::evaluate(const ExpressionPtr &expression) { return expression->accept(*this); }
+
+void Interpreter::execute(const StatementPtr &statement) { statement->accept(*this); }
+
+void Interpreter::execute_block(const StatementsVec &statements, const EnvironmentPtr &environment)
+{
+    const auto previous = this->environment;
+
+    try {
+        utils::ScopeGuard guard(this->environment, [&](auto &environment) { environment = previous; });
+        this->environment = environment;
+        for (const auto &statement : statements) { this->execute(statement); }
+    } catch (const exceptions::RuntimeError &error) {
+    }
+}
 
 types::Literal Interpreter::visit_unary_expression(parser::UnaryExpression &expression)
 {
@@ -104,6 +117,41 @@ types::Literal Interpreter::visit_binary_expression(parser::BinaryExpression &ex
 
     // unreachable
     return types::Literal("");
+}
+
+types::Literal Interpreter::visit_var_expression(parser::VarExpression &expression)
+{
+    return this->environment->get(expression.name);
+}
+
+types::Literal Interpreter::visit_assign_expression(parser::AssignExpression &expression)
+{
+    auto value = this->evaluate(expression.value);
+    this->environment->assign(expression.name, value);
+    return value;
+}
+
+void Interpreter::visit_print_statement(parser::PrintStatement &statement)
+{
+    const types::Literal value = this->evaluate(statement.expression);
+    fmt::print("{}\n", tek::interpreter::Interpreter::stringify(value));
+}
+
+void Interpreter::visit_expression_statement(parser::ExpressionStatement &statement)
+{
+    this->evaluate(statement.expression);
+}
+
+void Interpreter::visit_var_statement(parser::VarStatement &statement)
+{
+    types::Literal value(nullptr);
+    if (statement.initializer != nullptr) { value = this->evaluate(statement.initializer); }
+    this->environment->define(statement.name.lexeme, value);
+}
+
+void Interpreter::visit_block_statement(parser::BlockStatement &statement)
+{
+    this->execute_block(statement.statements, std::make_unique<Environment>(std::move(this->environment)));
 }
 
 bool Interpreter::is_truthy(const types::Literal::variant_t &value)

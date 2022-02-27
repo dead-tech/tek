@@ -1,10 +1,11 @@
 #ifndef TEK_PARSER_HPP
 #define TEK_PARSER_HPP
 
-#include "../excepetions/Exceptions.hpp"
+#include "../exceptions/Exceptions.hpp"
 #include "../logger/Logger.hpp"
 #include "../tokenizer/Token.hpp"
 #include "Expressions.hpp"
+#include "Statements.hpp"
 #include <optional>
 #include <utility>
 #include <vector>
@@ -15,19 +16,29 @@ class Parser
   private:
     using TokensVec     = std::vector<tokenizer::Token>;
     using ExpressionPtr = std::unique_ptr<Expression>;
+    using StatementPtr  = std::unique_ptr<Statement>;
+    using StatementsVec = std::vector<StatementPtr>;
 
   public:
     explicit Parser(TokensVec tokens);
-    [[nodiscard]] std::optional<ExpressionPtr> parse();
+    [[nodiscard]] std::optional<StatementsVec> parse();
 
   private:
     [[nodiscard]] ExpressionPtr expression();
     [[nodiscard]] ExpressionPtr equality();
+    [[nodiscard]] ExpressionPtr assignment();
     [[nodiscard]] ExpressionPtr comparison();
     [[nodiscard]] ExpressionPtr term();
     [[nodiscard]] ExpressionPtr factor();
     [[nodiscard]] ExpressionPtr unary();
     [[nodiscard]] ExpressionPtr primary();
+
+    [[nodiscard]] StatementPtr  statement();
+    [[nodiscard]] StatementPtr  declaration();
+    [[nodiscard]] StatementPtr  print_statement();
+    [[nodiscard]] StatementPtr  expression_statement();
+    [[nodiscard]] StatementPtr  var_statement();
+    [[nodiscard]] StatementsVec block_statement();
 
     bool match(const std::vector<tokenizer::TokenType> &types);
     bool check(const tokenizer::TokenType &type);

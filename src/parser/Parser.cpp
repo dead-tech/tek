@@ -4,7 +4,7 @@ namespace tek::parser {
 
 Parser::Parser(Parser::TokensVec tokens) : tokens{ std::move(tokens) }, current{ 0 } {}
 
-Parser::ExpressionPtr Parser::expression() { return this->equality(); }
+Parser::ExpressionPtr Parser::expression() { return this->assignment(); }
 
 Parser::ExpressionPtr Parser::equality()
 {
@@ -18,6 +18,24 @@ Parser::ExpressionPtr Parser::equality()
     }
 
     return left;
+}
+
+Parser::ExpressionPtr Parser::assignment()
+{
+    auto expression = this->equality();
+
+    if (this->match({ tokenizer::TokenType::EQUAL })) {
+        const auto equals = this->previous();
+        auto       value  = this->assignment();
+
+        if (auto *var_expr = dynamic_cast<VarExpression *>(expression.get())) {
+            return std::make_unique<AssignExpression>(var_expr->name, std::move(value));
+        }
+
+        this->error(equals, "Invalid assignment target.");
+    }
+
+    return expression;
 }
 
 Parser::ExpressionPtr Parser::comparison()
@@ -84,9 +102,74 @@ Parser::ExpressionPtr Parser::primary()
         auto expression = this->expression();
         this->consume(tokenizer::TokenType::RIGHT_PAREN, "Expect ')' after expression");
         return std::make_unique<GroupingExpression>(std::move(expression));
+    } else if (this->match({ tokenizer::TokenType::IDENTIFIER })) {
+        return std::make_unique<VarExpression>(this->previous());
     }
 
     throw this->error(this->peek(), "Expected expression.");
+}
+
+Parser::StatementPtr Parser::statement()
+{
+    if (this->match({ tokenizer::TokenType::PRINT })) { return this->print_statement(); }
+    if (this->match({ tokenizer::TokenType::LEFT_BRACE })) {
+        return std::make_unique<BlockStatement>(this->block_statement());
+    }
+
+    return this->expression_statement();
+}
+
+Parser::StatementPtr Parser::declaration()
+{
+    try {
+        if (this->match({ tokenizer::TokenType::VAR })) { return this->var_statement(); }
+
+        return this->statement();
+    } catch (const exceptions::RuntimeError &error) {
+        this->synchronize();
+        return nullptr;
+    }
+}
+
+Parser::StatementPtr Parser::print_statement()
+{
+    auto value = this->expression();
+    this->consume(tokenizer::TokenType::SEMICOLON, "Expected ';' after value.");
+
+    return std::make_unique<PrintStatement>(std::move(value));
+}
+
+Parser::StatementPtr Parser::expression_statement()
+{
+    auto value = this->expression();
+    this->consume(tokenizer::TokenType::SEMICOLON, "Expected ';' after expression.");
+
+    return std::make_unique<ExpressionStatement>(std::move(value));
+}
+
+Parser::StatementPtr Parser::var_statement()
+{
+    const auto name = this->consume(tokenizer::TokenType::IDENTIFIER, "Expected variable name.");
+
+    ExpressionPtr initializer = nullptr;
+
+    if (this->match({ tokenizer::TokenType::EQUAL })) { initializer = this->expression(); }
+
+    this->consume(tokenizer::TokenType::SEMICOLON, "Expected semicolon after variable declaration.");
+
+    return std::make_unique<VarStatement>(name, std::move(initializer));
+}
+
+Parser::StatementsVec Parser::block_statement()
+{
+    StatementsVec out;
+
+    while (!this->check(tokenizer::TokenType::RIGHT_BRACE) && !this->is_at_end()) {
+        out.push_back(std::move(this->declaration()));
+    }
+
+    this->consume(tokenizer::TokenType::RIGHT_BRACE, "Expect '}' after block.");
+    return out;
 }
 
 bool Parser::match(const std::vector<tokenizer::TokenType> &types)
@@ -156,13 +239,15 @@ void Parser::synchronize()
     }
 }
 
-std::optional<Parser::ExpressionPtr> Parser::parse()
+std::optional<Parser::StatementsVec> Parser::parse()
 {
+    StatementsVec out;
     try {
-        if (this->is_at_end()) { return std::nullopt; }
-        return this->expression();
+        while (!this->is_at_end()) { out.push_back(this->declaration()); }
     } catch (const exceptions::ParseError &error) {
         return std::nullopt;
     }
+
+    return out;
 }
 };// namespace tek::parser

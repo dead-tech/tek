@@ -1,7 +1,7 @@
 #ifndef LOGGER_HPP
 #define LOGGER_HPP
 
-#include "../excepetions/Exceptions.hpp"
+#include "../exceptions/Exceptions.hpp"
 #include "../tokenizer/Token.hpp"
 #include <fmt/format.h>
 #include <string>

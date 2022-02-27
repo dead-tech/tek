@@ -7,7 +7,7 @@ import sys
 BUILD_PATH: str = f'{os.getcwd()}/build/'
 BINARY_PATH: str = f'{os.getcwd()}/build/tek'
 TARGET: str = 'tek'
-EXAMPLES_PATH = f'{os.getcwd()}/tests/examples/'
+EXAMPLES_PATH = f'{os.getcwd()}/tests/'
 
 
 def check_exit_code(result: subprocess.CompletedProcess, message: str) -> None:
@@ -43,27 +43,44 @@ def print_results(
     actual_result: subprocess.CompletedProcess,
     expected_result: str,
 ) -> None:
-    print(f'[NOTE] Got: {actual_result.stdout.decode().strip().encode()}')
-    print(f'[NOTE] Expected: {expected_result.encode()}')
+    print(f'[NOTE] Got:      {actual_result.stdout}')
+    print(f'[NOTE] Expected: {expected_result}')
 
 
 def run_examples(examples: list[str]) -> None:
     if not os.getcwd().endswith('/build'):
         os.chdir(BUILD_PATH)
 
+    succeeding = 0
+    failing = 0
+    skipped = 0
+
     print('[INFO] Running tests')
     for example in examples:
         filename = example.split('/')[-1]
         with open(example) as file:
-            last_line: str = file.readlines()[-1]
-            expected_result: str = last_line.rsplit('e', 1)[-1].strip()
+            lines = file.readlines()
+            first_line: str = lines[0]
+
+            if 'ignore' in first_line.lower():
+                skipped += 1
+                continue
+
+            last_line: str = lines[-1]
+            expected_result: str = last_line[
+                last_line.find(
+                    '\'',
+                ) + 1:-2
+            ].rstrip().replace(':', '\n')
             result = subprocess.run(['./tek', example], capture_output=True)
 
             if expected_result == '(fail)':
                 try:
                     assert(result.returncode != 0)
+                    succeeding += 1
                     print(f'[TEST] {filename}...SUCCESS')
                 except AssertionError:
+                    failing += 1
                     print(f'[ERROR] Test {filename} FAILED')
                     print(f'[INFO] Test was supposed to fail but exit code was {result.returncode}')  # noqa: E501
                     print_results(result, expected_result)
@@ -71,12 +88,16 @@ def run_examples(examples: list[str]) -> None:
                 continue
 
             try:
-                assert(expected_result == result.stdout.decode().strip())
+                assert(expected_result == result.stdout.decode())
+                succeeding += 1
                 print(f'[TEST] {filename}...SUCCESS')
             except AssertionError:
+                failing += 1
                 print(f'[ERROR] Test {filename} FAILED')
                 print_results(result, expected_result)
                 sys.exit(1)
+
+    print(f'\n[TESTS RECAP] succeeding: {succeeding}, failing: {failing}, skipped: {skipped}\n')  # noqa: E501
 
 
 def main() -> int:
