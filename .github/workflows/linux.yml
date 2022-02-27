@@ -41,4 +41,4 @@ jobs:
       - name: Run tests
         run: ${{github.workspace}}/build/tests
       - name: Run Examples
-        run: python ${{github.workspace}}/tests/run_examples.py
+        run: python ${{github.workspace}}/run_tests.py
