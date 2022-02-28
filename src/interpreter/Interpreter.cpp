@@ -42,9 +42,7 @@ types::Literal Interpreter::visit_unary_expression(parser::UnaryExpression &expr
 
     switch (expression.op.type) {
     case tokenizer::TokenType::MINUS: {
-        this->assert_operand_types<double>(expression.op, right);
-        const auto value = std::get<double>(right);
-        return types::Literal(-value);
+        return Interpreter::interpret_unary_minus(expression, right);
     }
     case tokenizer::TokenType::BANG:
         return types::Literal(!tek::interpreter::Interpreter::is_truthy(right));
@@ -54,58 +52,36 @@ types::Literal Interpreter::visit_unary_expression(parser::UnaryExpression &expr
     return types::Literal("");
 }
 
+
 types::Literal Interpreter::visit_binary_expression(parser::BinaryExpression &expression)
 {
-    const auto right = this->evaluate(expression.right).value();
     const auto left  = this->evaluate(expression.left).value();
+    const auto right = this->evaluate(expression.right).value();
 
-    // TODO: Create a method for each op
     switch (expression.op.type) {
     case tokenizer::TokenType::MINUS: {
-        this->assert_operand_types<double>(expression.op, left, right);
-        const auto &[left_value, right_value] = variants::to_tuple<double>(left, right);
-        return types::Literal(left_value - right_value);
+        return Interpreter::interpret_binary_minus(expression, left, right);
     }
     case tokenizer::TokenType::PLUS: {
-        if (variants::have_type_of<std::string>(left, right)) {
-            const auto &[left_value, right_value] = variants::to_tuple<std::string>(left, right);
-            return types::Literal(left_value + right_value);
-        } else if (variants::have_type_of<double>(left, right)) {
-            const auto &[left_value, right_value] = variants::to_tuple<double>(left, right);
-            return types::Literal(left_value + right_value);
-        } else {
-            throw exceptions::RuntimeError(expression.op, "Operands must be both of type `string` or `number`");
-        }
+        return Interpreter::interpret_binary_plus(expression, left, right);
     }
     case tokenizer::TokenType::SLASH: {
-        this->assert_operand_types<double>(expression.op, left, right);
-        const auto &[left_value, right_value] = variants::to_tuple<double>(left, right);
-        return types::Literal(left_value / right_value);
+        return Interpreter::interpret_binary_slash(expression, left, right);
     }
     case tokenizer::TokenType::STAR: {
-        this->assert_operand_types<double>(expression.op, left, right);
-        const auto &[left_value, right_value] = variants::to_tuple<double>(left, right);
-        return types::Literal(left_value * right_value);
+        return Interpreter::interpret_binary_star(expression, left, right);
     }
     case tokenizer::TokenType::GREATER: {
-        this->assert_operand_types<double>(expression.op, left, right);
-        const auto &[left_value, right_value] = variants::to_tuple<double>(left, right);
-        return types::Literal(left_value > right_value);
+        return Interpreter::interpret_binary_greater(expression, left, right);
     }
     case tokenizer::TokenType::GREATER_EQUAL: {
-        this->assert_operand_types<double>(expression.op, left, right);
-        const auto &[left_value, right_value] = variants::to_tuple<double>(left, right);
-        return types::Literal(left_value >= right_value);
+        return Interpreter::interpret_binary_greater_equal(expression, left, right);
     }
     case tokenizer::TokenType::LESS: {
-        this->assert_operand_types<double>(expression.op, left, right);
-        const auto &[left_value, right_value] = variants::to_tuple<double>(left, right);
-        return types::Literal(left_value < right_value);
+        return Interpreter::interpret_binary_less(expression, left, right);
     }
     case tokenizer::TokenType::LESS_EQUAL: {
-        this->assert_operand_types<double>(expression.op, left, right);
-        const auto &[left_value, right_value] = variants::to_tuple<double>(left, right);
-        return types::Literal(left_value <= right_value);
+        return Interpreter::interpret_binary_less_equal(expression, left, right);
     }
     case tokenizer::TokenType::BANG_EQUAL: {
         return types::Literal(!tek::interpreter::Interpreter::is_equal(left, right));
@@ -152,6 +128,92 @@ void Interpreter::visit_var_statement(parser::VarStatement &statement)
 void Interpreter::visit_block_statement(parser::BlockStatement &statement)
 {
     this->execute_block(statement.statements, std::make_unique<Environment>(std::move(this->environment)));
+}
+
+types::Literal Interpreter::interpret_unary_minus(const parser::UnaryExpression &expression,
+  const types::Literal::variant_t                                               &right)
+{
+    Interpreter::assert_operand_types<double>(expression.op, right);
+    const auto value = std::get<double>(right);
+    return types::Literal(-value);
+}
+
+types::Literal Interpreter::interpret_binary_minus(const parser::BinaryExpression &expression,
+  const types::Literal::variant_t                                                 &left,
+  const types::Literal::variant_t                                                 &right)
+{
+    Interpreter::assert_operand_types<double>(expression.op, left, right);
+    const auto &[left_value, right_value] = variants::to_tuple<double>(left, right);
+    return types::Literal(left_value - right_value);
+}
+
+types::Literal Interpreter::interpret_binary_plus(parser::BinaryExpression &expression,
+  const types::Literal::variant_t                                          &left,
+  const types::Literal::variant_t                                          &right)
+{
+    if (variants::have_type_of<std::string>(left, right)) {
+        const auto &[left_value, right_value] = variants::to_tuple<std::string>(left, right);
+        return types::Literal(left_value + right_value);
+    } else if (variants::have_type_of<double>(left, right)) {
+        const auto &[left_value, right_value] = variants::to_tuple<double>(left, right);
+        return types::Literal(left_value + right_value);
+    } else {
+        throw exceptions::RuntimeError(expression.op, "Operands must be both of type `string` or `number`");
+    }
+}
+
+types::Literal Interpreter::interpret_binary_slash(const parser::BinaryExpression &expression,
+  const types::Literal::variant_t                                                 &left,
+  const types::Literal::variant_t                                                 &right)
+{
+    Interpreter::assert_operand_types<double>(expression.op, left, right);
+    const auto &[left_value, right_value] = variants::to_tuple<double>(left, right);
+    return types::Literal(left_value / right_value);
+}
+
+types::Literal Interpreter::interpret_binary_star(const parser::BinaryExpression &expression,
+  const types::Literal::variant_t                                                &left,
+  const types::Literal::variant_t                                                &right)
+{
+    Interpreter::assert_operand_types<double>(expression.op, left, right);
+    const auto &[left_value, right_value] = variants::to_tuple<double>(left, right);
+    return types::Literal(left_value * right_value);
+}
+
+types::Literal Interpreter::interpret_binary_greater(const parser::BinaryExpression &expression,
+  const types::Literal::variant_t                                                   &left,
+  const types::Literal::variant_t                                                   &right)
+{
+    Interpreter::assert_operand_types<double>(expression.op, left, right);
+    const auto &[left_value, right_value] = variants::to_tuple<double>(left, right);
+    return types::Literal(left_value > right_value);
+}
+
+types::Literal Interpreter::interpret_binary_greater_equal(const parser::BinaryExpression &expression,
+  const types::Literal::variant_t                                                         &left,
+  const types::Literal::variant_t                                                         &right)
+{
+    Interpreter::assert_operand_types<double>(expression.op, left, right);
+    const auto &[left_value, right_value] = variants::to_tuple<double>(left, right);
+    return types::Literal(left_value >= right_value);
+}
+
+types::Literal Interpreter::interpret_binary_less(const parser::BinaryExpression &expression,
+  const types::Literal::variant_t                                                &left,
+  const types::Literal::variant_t                                                &right)
+{
+    Interpreter::assert_operand_types<double>(expression.op, left, right);
+    const auto &[left_value, right_value] = variants::to_tuple<double>(left, right);
+    return types::Literal(left_value < right_value);
+}
+
+types::Literal Interpreter::interpret_binary_less_equal(const parser::BinaryExpression &expression,
+  const types::Literal::variant_t                                                      &left,
+  const types::Literal::variant_t                                                      &right)
+{
+    Interpreter::assert_operand_types<double>(expression.op, left, right);
+    const auto &[left_value, right_value] = variants::to_tuple<double>(left, right);
+    return types::Literal(left_value <= right_value);
 }
 
 constexpr bool Interpreter::is_truthy(const types::Literal::variant_t &value)

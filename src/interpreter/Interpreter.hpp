@@ -37,6 +37,44 @@ class Interpreter
     void visit_var_statement(parser::VarStatement &statement) override;
     void visit_block_statement(parser::BlockStatement &statement) override;
 
+    // Statement impl
+  private:
+    [[nodiscard]] static types::Literal interpret_unary_minus(const parser::UnaryExpression &expression,
+      const types::Literal::variant_t                                                       &right);
+
+    [[nodiscard]] static types::Literal interpret_binary_minus(const parser::BinaryExpression &expression,
+      const types::Literal::variant_t                                                         &left,
+      const types::Literal::variant_t                                                         &right);
+
+    [[nodiscard]] static types::Literal interpret_binary_plus(parser::BinaryExpression &expression,
+      const types::Literal::variant_t                                                  &left,
+      const types::Literal::variant_t                                                  &right);
+
+    [[nodiscard]] static types::Literal interpret_binary_slash(const parser::BinaryExpression &expression,
+      const types::Literal::variant_t                                                         &left,
+      const types::Literal::variant_t                                                         &right);
+
+    [[nodiscard]] static types::Literal interpret_binary_star(const parser::BinaryExpression &expression,
+      const types::Literal::variant_t                                                        &left,
+      const types::Literal::variant_t                                                        &right);
+
+    [[nodiscard]] static types::Literal interpret_binary_greater(const parser::BinaryExpression &expression,
+      const types::Literal::variant_t                                                           &left,
+      const types::Literal::variant_t                                                           &right);
+
+    [[nodiscard]] static types::Literal interpret_binary_greater_equal(const parser::BinaryExpression &expression,
+      const types::Literal::variant_t                                                                 &left,
+      const types::Literal::variant_t                                                                 &right);
+
+    [[nodiscard]] static types::Literal interpret_binary_less(const parser::BinaryExpression &expression,
+      const types::Literal::variant_t                                                        &left,
+      const types::Literal::variant_t                                                        &right);
+
+    [[nodiscard]] static types::Literal interpret_binary_less_equal(const parser::BinaryExpression &expression,
+      const types::Literal::variant_t                                                              &left,
+      const types::Literal::variant_t                                                              &right);
+
+    // Helpers
   private:
     types::Literal evaluate(const ExpressionPtr &expression);
 
@@ -48,7 +86,7 @@ class Interpreter
       const types::Literal::variant_t                                            &right);
 
     template<typename AssertType, typename... Variants>
-    constexpr void assert_operand_types(const tokenizer::Token &op, Variants &&...variants);
+    constexpr static void assert_operand_types(const tokenizer::Token &op, Variants &&...variants);
 
     [[nodiscard]] static std::string stringify(const types::Literal &value);
 

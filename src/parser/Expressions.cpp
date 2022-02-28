@@ -1,7 +1,6 @@
 #include "Expressions.hpp"
 
 #include <utility>
-// TODO: Sort these methods
 namespace tek::parser {
 BinaryExpression::BinaryExpression(Expression::ExpressionPtr left, tokenizer::Token op, Expression::ExpressionPtr right)
   : left{ std::move(left) }, op{ std::move(op) }, right{ std::move(right) }
