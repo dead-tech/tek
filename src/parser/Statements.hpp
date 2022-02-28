@@ -11,82 +11,82 @@
 
 namespace tek::parser {
 
-template<typename ReturnType>
-class StatementVisitor;
+    template<typename ReturnType>
+    class StatementVisitor;
 
-class Statement
-{
-  public:
-    virtual std::string accept(StatementVisitor<std::string> &visitor) = 0;
-    virtual void        accept(StatementVisitor<void> &visitor)        = 0;
+    class Statement
+    {
+      public:
+        virtual std::string accept(StatementVisitor<std::string> &visitor) = 0;
+        virtual void        accept(StatementVisitor<void> &visitor)        = 0;
 
-  protected:
-    using ExpressionPtr = std::unique_ptr<Expression>;
-};
+      protected:
+        using ExpressionPtr = std::unique_ptr<Expression>;
+    };
 
-class PrintStatement : public Statement
-{
-  public:
-    explicit PrintStatement(ExpressionPtr expression);
+    class PrintStatement : public Statement
+    {
+      public:
+        explicit PrintStatement(ExpressionPtr expression);
 
-    std::string accept(StatementVisitor<std::string> &visitor) override;
-    void        accept(StatementVisitor<void> &visitor) override;
+        std::string accept(StatementVisitor<std::string> &visitor) override;
+        void        accept(StatementVisitor<void> &visitor) override;
 
-  public:
-    ExpressionPtr expression;
-};
+      public:
+        ExpressionPtr expression;
+    };
 
-class ExpressionStatement : public Statement
-{
-  public:
-    explicit ExpressionStatement(ExpressionPtr expression);
+    class ExpressionStatement : public Statement
+    {
+      public:
+        explicit ExpressionStatement(ExpressionPtr expression);
 
-    std::string accept(StatementVisitor<std::string> &visitor) override;
-    void        accept(StatementVisitor<void> &visitor) override;
+        std::string accept(StatementVisitor<std::string> &visitor) override;
+        void        accept(StatementVisitor<void> &visitor) override;
 
-  public:
-    ExpressionPtr expression;
-};
+      public:
+        ExpressionPtr expression;
+    };
 
-class VarStatement : public Statement
-{
-  public:
-    VarStatement(tokenizer::Token name, ExpressionPtr initializer);
+    class VarStatement : public Statement
+    {
+      public:
+        VarStatement(tokenizer::Token name, ExpressionPtr initializer);
 
-    std::string accept(StatementVisitor<std::string> &visitor) override;
-    void        accept(StatementVisitor<void> &visitor) override;
+        std::string accept(StatementVisitor<std::string> &visitor) override;
+        void        accept(StatementVisitor<void> &visitor) override;
 
-  public:
-    tokenizer::Token name;
-    ExpressionPtr    initializer;
-};
+      public:
+        tokenizer::Token name;
+        ExpressionPtr    initializer;
+    };
 
 
-class BlockStatement : public Statement
-{
-  private:
-    using StatementPtr  = std::unique_ptr<Statement>;
-    using StatementsVec = std::vector<StatementPtr>;
+    class BlockStatement : public Statement
+    {
+      private:
+        using StatementPtr  = std::unique_ptr<Statement>;
+        using StatementsVec = std::vector<StatementPtr>;
 
-  public:
-    explicit BlockStatement(StatementsVec statements);
+      public:
+        explicit BlockStatement(StatementsVec statements);
 
-    std::string accept(StatementVisitor<std::string> &visitor) override;
-    void        accept(StatementVisitor<void> &visitor) override;
+        std::string accept(StatementVisitor<std::string> &visitor) override;
+        void        accept(StatementVisitor<void> &visitor) override;
 
-  public:
-    StatementsVec statements;
-};
+      public:
+        StatementsVec statements;
+    };
 
-template<typename ReturnType>
-class StatementVisitor
-{
-  public:
-    virtual ReturnType visit_print_statement(PrintStatement &statement)           = 0;
-    virtual ReturnType visit_expression_statement(ExpressionStatement &statement) = 0;
-    virtual ReturnType visit_var_statement(VarStatement &statement)               = 0;
-    virtual ReturnType visit_block_statement(BlockStatement &statement)           = 0;
-};
+    template<typename ReturnType>
+    class StatementVisitor
+    {
+      public:
+        virtual ReturnType visit_print_statement(PrintStatement &statement)           = 0;
+        virtual ReturnType visit_expression_statement(ExpressionStatement &statement) = 0;
+        virtual ReturnType visit_var_statement(VarStatement &statement)               = 0;
+        virtual ReturnType visit_block_statement(BlockStatement &statement)           = 0;
+    };
 }// namespace tek::parser
 
 #endif

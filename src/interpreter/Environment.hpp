@@ -8,23 +8,23 @@
 #include <unordered_map>
 
 namespace tek::interpreter {
-class Environment
-{
-  private:
-    using EnvironmentPtr = std::shared_ptr<Environment>;
+    class Environment
+    {
+      private:
+        using EnvironmentPtr = std::shared_ptr<Environment>;
 
-  public:
-    Environment();
-    explicit Environment(EnvironmentPtr enclosing);
+      public:
+        Environment();
+        explicit Environment(EnvironmentPtr enclosing);
 
-    void                         define(const std::string &name, const types::Literal &initializer);
-    [[nodiscard]] types::Literal get(const tokenizer::Token &name);
-    void                         assign(const tokenizer::Token &name, const types::Literal &value);
+        void                         define(const std::string &name, const types::Literal &initializer);
+        [[nodiscard]] types::Literal get(const tokenizer::Token &name);
+        void                         assign(const tokenizer::Token &name, const types::Literal &value);
 
-  private:
-    std::unordered_map<std::string, types::Literal> variables;
-    EnvironmentPtr                                  enclosing;
-};
+      private:
+        std::unordered_map<std::string, types::Literal> variables;
+        EnvironmentPtr                                  enclosing;
+    };
 }// namespace tek::interpreter
 
 

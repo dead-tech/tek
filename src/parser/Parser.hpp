@@ -11,57 +11,57 @@
 #include <vector>
 
 namespace tek::parser {
-class Parser
-{
-  private:
-    using TokensVec     = std::vector<tokenizer::Token>;
-    using ExpressionPtr = std::unique_ptr<Expression>;
-    using StatementPtr  = std::unique_ptr<Statement>;
-    using StatementsVec = std::vector<StatementPtr>;
+    class Parser
+    {
+      private:
+        using TokensVec     = std::vector<tokenizer::Token>;
+        using ExpressionPtr = std::unique_ptr<Expression>;
+        using StatementPtr  = std::unique_ptr<Statement>;
+        using StatementsVec = std::vector<StatementPtr>;
 
-  public:
-    explicit Parser(TokensVec tokens);
-    [[nodiscard]] std::optional<StatementsVec> parse();
+      public:
+        explicit Parser(TokensVec tokens);
+        [[nodiscard]] std::optional<StatementsVec> parse();
 
-  private:
-    [[nodiscard]] ExpressionPtr expression();
-    [[nodiscard]] ExpressionPtr equality();
-    [[nodiscard]] ExpressionPtr assignment();
-    [[nodiscard]] ExpressionPtr comparison();
-    [[nodiscard]] ExpressionPtr term();
-    [[nodiscard]] ExpressionPtr factor();
-    [[nodiscard]] ExpressionPtr unary();
-    [[nodiscard]] ExpressionPtr primary();
+      private:
+        [[nodiscard]] ExpressionPtr expression();
+        [[nodiscard]] ExpressionPtr equality();
+        [[nodiscard]] ExpressionPtr assignment();
+        [[nodiscard]] ExpressionPtr comparison();
+        [[nodiscard]] ExpressionPtr term();
+        [[nodiscard]] ExpressionPtr factor();
+        [[nodiscard]] ExpressionPtr unary();
+        [[nodiscard]] ExpressionPtr primary();
 
-    [[nodiscard]] StatementPtr  statement();
-    [[nodiscard]] StatementPtr  declaration();
-    [[nodiscard]] StatementPtr  print_statement();
-    [[nodiscard]] StatementPtr  expression_statement();
-    [[nodiscard]] StatementPtr  var_statement();
-    [[nodiscard]] StatementsVec block_statement();
+        [[nodiscard]] StatementPtr  statement();
+        [[nodiscard]] StatementPtr  declaration();
+        [[nodiscard]] StatementPtr  print_statement();
+        [[nodiscard]] StatementPtr  expression_statement();
+        [[nodiscard]] StatementPtr  var_statement();
+        [[nodiscard]] StatementsVec block_statement();
 
-    template<typename Match>
-    [[nodiscard]] constexpr bool match(Match &&match);
+        template<typename Match>
+        [[nodiscard]] constexpr bool match(Match &&match);
 
-    template<typename... Matches>
-    [[nodiscard]] constexpr bool match(Matches &&...matches);
+        template<typename... Matches>
+        [[nodiscard]] constexpr bool match(Matches &&...matches);
 
-    bool check(const tokenizer::TokenType &type);
-    bool is_at_end();
+        bool check(const tokenizer::TokenType &type);
+        bool is_at_end();
 
-    tokenizer::Token advance();
-    tokenizer::Token peek();
-    tokenizer::Token previous();
-    tokenizer::Token consume(const tokenizer::TokenType &type, const std::string &message);
+        tokenizer::Token advance();
+        tokenizer::Token peek();
+        tokenizer::Token previous();
+        tokenizer::Token consume(const tokenizer::TokenType &type, const std::string &message);
 
-    void synchronize();
+        void synchronize();
 
-    static exceptions::ParseError error(const tokenizer::Token &token, const std::string &message);
+        static exceptions::ParseError error(const tokenizer::Token &token, const std::string &message);
 
-  private:
-    TokensVec   tokens;
-    std::size_t current;
-};
+      private:
+        TokensVec   tokens;
+        std::size_t current;
+    };
 }// namespace tek::parser
 
 #endif// TEK_PARSER_HPP

@@ -9,7 +9,7 @@
 #include <fmt/format.h>
 
 namespace tek::fs {
-[[nodiscard]] std::string read_file(const std::filesystem::path &path);
+    [[nodiscard]] std::string read_file(const std::filesystem::path &path);
 }// namespace tek::fs
 
 #endif
