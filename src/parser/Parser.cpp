@@ -22,7 +22,7 @@ namespace tek::parser {
 
     Parser::ExpressionPtr Parser::assignment()
     {
-        auto expression = this->equality();
+        auto expression = this->logical_or();
 
         if (this->match(tokenizer::TokenType::EQUAL)) {
             const auto equals = this->previous();
@@ -110,11 +110,45 @@ namespace tek::parser {
         throw Parser::error(this->peek(), "Expected expression.");
     }
 
+    Parser::ExpressionPtr Parser::logical_or()
+    {
+        auto left = this->logical_and();
+
+        while (this->match(tokenizer::TokenType::OR)) {
+            const auto op    = this->previous();
+            auto       right = this->logical_and();
+            left             = std::make_unique<LogicalExpression>(std::move(left), op, std::move(right));
+        }
+
+        return left;
+    }
+
+    Parser::ExpressionPtr Parser::logical_and()
+    {
+        auto left = this->equality();
+
+        while (this->match(tokenizer::TokenType::AND)) {
+            const auto op    = this->previous();
+            auto       right = this->equality();
+            left             = std::make_unique<LogicalExpression>(std::move(left), op, std::move(right));
+        }
+
+        return left;
+    }
+
     Parser::StatementPtr Parser::statement()
     {
-        if (this->match(tokenizer::TokenType::PRINT)) { return this->print_statement(); }
-        if (this->match(tokenizer::TokenType::LEFT_BRACE)) {
+        // check this if it doesn't work
+        if (this->match(tokenizer::TokenType::PRINT)) {
+            return this->print_statement();
+        } else if (this->match(tokenizer::TokenType::LEFT_BRACE)) {
             return std::make_unique<BlockStatement>(this->block_statement());
+        } else if (this->match(tokenizer::TokenType::IF)) {
+            return this->if_statement();
+        } else if (this->match(tokenizer::TokenType::WHILE)) {
+            return this->while_statement();
+        } else if (this->match(tokenizer::TokenType::FOR)) {
+            return this->for_statement();
         }
 
         return this->expression_statement();
@@ -171,6 +205,77 @@ namespace tek::parser {
 
         this->consume(tokenizer::TokenType::RIGHT_BRACE, "Expect '}' after block.");
         return out;
+    }
+
+    Parser::StatementPtr Parser::if_statement()
+    {
+        this->consume(tokenizer::TokenType::LEFT_PAREN, "Expected '(' after if keyword.");
+        auto condition = this->expression();
+        this->consume(tokenizer::TokenType::RIGHT_PAREN, "Expected ')' after condition in if statement.");
+
+        auto         then_branch = this->statement();
+        StatementPtr else_branch = nullptr;
+
+        if (this->match(tokenizer::TokenType::ELSE)) { else_branch = this->statement(); }
+
+        return std::make_unique<IfStatement>(std::move(condition), std::move(then_branch), std::move(else_branch));
+    }
+
+    Parser::StatementPtr Parser::while_statement()
+    {
+        this->consume(tokenizer::TokenType::LEFT_PAREN, "Expected '(' after while keyword.");
+        auto condition = this->expression();
+        this->consume(tokenizer::TokenType::RIGHT_PAREN, "Expected ')' after condition in while loop.");
+
+        auto body = this->statement();
+        return std::make_unique<WhileStatement>(std::move(condition), std::move(body));
+    }
+
+    Parser::StatementPtr Parser::for_statement()
+    {
+        this->consume(tokenizer::TokenType::LEFT_PAREN, "Expected '(' after for keyword.");
+
+        StatementPtr initializer;
+        if (this->match(tokenizer::TokenType::SEMICOLON)) {
+            initializer = nullptr;
+        } else if (this->match(tokenizer::TokenType::VAR)) {
+            initializer = this->var_statement();
+        } else {
+            initializer = this->expression_statement();
+        }
+
+        ExpressionPtr condition;
+        if (!this->match(tokenizer::TokenType::SEMICOLON)) { condition = this->expression(); }
+
+        this->consume(tokenizer::TokenType::SEMICOLON, "Expected ';' after for loop condition.");
+
+        ExpressionPtr increment;
+        if (!this->match(tokenizer::TokenType::RIGHT_PAREN)) { increment = this->expression(); }
+
+        // Is this the correct error message, though?
+        this->consume(tokenizer::TokenType::RIGHT_PAREN, "Expected ';' after loop increment variable.");
+
+        auto body = this->statement();
+
+        if (increment != nullptr) {
+            StatementsVec out;
+            out.push_back(std::move(initializer));
+            out.push_back(std::make_unique<ExpressionStatement>(std::move(increment)));
+            body = std::make_unique<BlockStatement>(std::move(out));
+        }
+
+        if (condition == nullptr) { condition = std::make_unique<LiteralExpression>(true); }
+
+        body = std::make_unique<WhileStatement>(std::move(condition), std::move(body));
+
+        if (initializer != nullptr) {
+            StatementsVec out;
+            out.push_back(std::move(initializer));
+            out.push_back(std::move(body));
+            body = std::make_unique<BlockStatement>(std::move(out));
+        }
+
+        return body;
     }
 
     template<typename Match>

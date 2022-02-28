@@ -32,6 +32,8 @@ namespace tek::parser {
         [[nodiscard]] ExpressionPtr factor();
         [[nodiscard]] ExpressionPtr unary();
         [[nodiscard]] ExpressionPtr primary();
+        [[nodiscard]] ExpressionPtr logical_or();
+        [[nodiscard]] ExpressionPtr logical_and();
 
         [[nodiscard]] StatementPtr  statement();
         [[nodiscard]] StatementPtr  declaration();
@@ -39,6 +41,9 @@ namespace tek::parser {
         [[nodiscard]] StatementPtr  expression_statement();
         [[nodiscard]] StatementPtr  var_statement();
         [[nodiscard]] StatementsVec block_statement();
+        [[nodiscard]] StatementPtr  if_statement();
+        [[nodiscard]] StatementPtr  while_statement();
+        [[nodiscard]] StatementPtr  for_statement();
 
         template<typename Match>
         [[nodiscard]] constexpr bool match(Match &&match);

@@ -98,4 +98,23 @@ namespace tek::parser {
     }
 
     void AssignExpression::accept(ExpressionVisitor<void> &visitor) { return visitor.visit_assign_expression(*this); }
+
+    LogicalExpression::LogicalExpression(
+      Expression::ExpressionPtr left,
+      tokenizer::Token          op,
+      Expression::ExpressionPtr right)
+      : left{ std::move(left) }, op{ std::move(op) }, right{ std::move(right) }
+    {}
+
+    std::string LogicalExpression::accept(ExpressionVisitor<std::string> &visitor)
+    {
+        return visitor.visit_logical_expression(*this);
+    }
+
+    types::Literal LogicalExpression::accept(ExpressionVisitor<types::Literal> &visitor)
+    {
+        return visitor.visit_logical_expression(*this);
+    }
+
+    void LogicalExpression::accept(ExpressionVisitor<void> &visitor) { return visitor.visit_logical_expression(*this); }
 }// namespace tek::parser

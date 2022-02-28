@@ -78,6 +78,39 @@ namespace tek::parser {
         StatementsVec statements;
     };
 
+    class IfStatement : public Statement
+    {
+      private:
+        using StatementPtr = std::unique_ptr<Statement>;
+
+      public:
+        IfStatement(ExpressionPtr condition, StatementPtr then_branch, StatementPtr else_branch);
+
+        std::string accept(StatementVisitor<std::string> &visitor) override;
+        void        accept(StatementVisitor<void> &visitor) override;
+
+      public:
+        ExpressionPtr condition;
+        StatementPtr  then_branch;
+        StatementPtr  else_branch;
+    };
+
+    class WhileStatement : public Statement
+    {
+      private:
+        using StatementPtr = std::unique_ptr<Statement>;
+
+      public:
+        WhileStatement(ExpressionPtr condition, StatementPtr body);
+
+        std::string accept(StatementVisitor<std::string> &visitor) override;
+        void        accept(StatementVisitor<void> &visitor) override;
+
+      public:
+        ExpressionPtr condition;
+        StatementPtr  body;
+    };
+
     template<typename ReturnType>
     class StatementVisitor
     {
@@ -86,6 +119,8 @@ namespace tek::parser {
         virtual ReturnType visit_expression_statement(ExpressionStatement &statement) = 0;
         virtual ReturnType visit_var_statement(VarStatement &statement)               = 0;
         virtual ReturnType visit_block_statement(BlockStatement &statement)           = 0;
+        virtual ReturnType visit_if_statement(IfStatement &statement)                 = 0;
+        virtual ReturnType visit_while_statement(WhileStatement &statement)           = 0;
     };
 }// namespace tek::parser
 

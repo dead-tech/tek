@@ -44,4 +44,28 @@ namespace tek::parser {
 
     void BlockStatement::accept(StatementVisitor<void> &visitor) { return visitor.visit_block_statement(*this); }
 
+    IfStatement::IfStatement(
+      Statement::ExpressionPtr  condition,
+      IfStatement::StatementPtr then_branch,
+      IfStatement::StatementPtr else_branch)
+      : condition{ std::move(condition) }, then_branch{ std::move(else_branch) }, else_branch{ std::move(else_branch) }
+    {}
+
+    std::string IfStatement::accept(StatementVisitor<std::string> &visitor)
+    {
+        return visitor.visit_if_statement(*this);
+    }
+
+    void IfStatement::accept(StatementVisitor<void> &visitor) { return visitor.visit_if_statement(*this); }
+
+    WhileStatement::WhileStatement(Statement::ExpressionPtr condition, WhileStatement::StatementPtr body)
+      : condition{ std::move(condition) }, body{ std::move(body) }
+    {}
+
+    std::string WhileStatement::accept(StatementVisitor<std::string> &visitor)
+    {
+        return visitor.visit_while_statement(*this);
+    }
+
+    void WhileStatement::accept(StatementVisitor<void> &visitor) { return visitor.visit_while_statement(*this); }
 }// namespace tek::parser

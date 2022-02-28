@@ -104,6 +104,21 @@ namespace tek::parser {
         ExpressionPtr    value;
     };
 
+    class LogicalExpression : public Expression
+    {
+      public:
+        LogicalExpression(ExpressionPtr left, tokenizer::Token op, ExpressionPtr right);
+
+        std::string    accept(ExpressionVisitor<std::string> &visitor) override;
+        types::Literal accept(ExpressionVisitor<types::Literal> &visitor) override;
+        void           accept(ExpressionVisitor<void> &visitor) override;
+
+      public:
+        ExpressionPtr    left;
+        tokenizer::Token op;
+        ExpressionPtr    right;
+    };
+
     template<typename ReturnType>
     class ExpressionVisitor
     {
@@ -114,6 +129,7 @@ namespace tek::parser {
         virtual ReturnType visit_unary_expression(UnaryExpression &expression)       = 0;
         virtual ReturnType visit_var_expression(VarExpression &expression)           = 0;
         virtual ReturnType visit_assign_expression(AssignExpression &expression)     = 0;
+        virtual ReturnType visit_logical_expression(LogicalExpression &expression)   = 0;
     };
 }// namespace tek::parser
 

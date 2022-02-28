@@ -31,11 +31,14 @@ namespace tek::interpreter {
         [[nodiscard]] types::Literal visit_binary_expression(parser::BinaryExpression &expression) override;
         [[nodiscard]] types::Literal visit_var_expression(parser::VarExpression &expression) override;
         [[nodiscard]] types::Literal visit_assign_expression(parser::AssignExpression &expression) override;
+        [[nodiscard]] types::Literal visit_logical_expression(parser::LogicalExpression &expression) override;
 
         void visit_print_statement(parser::PrintStatement &statement) override;
         void visit_expression_statement(parser::ExpressionStatement &statement) override;
         void visit_var_statement(parser::VarStatement &statement) override;
         void visit_block_statement(parser::BlockStatement &statement) override;
+        void visit_if_statement(parser::IfStatement &statement) override;
+        void visit_while_statement(parser::WhileStatement &statement) override;
 
         // Statement impl
       private:

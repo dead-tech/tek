@@ -107,6 +107,19 @@ namespace tek::interpreter {
         return value;
     }
 
+    types::Literal Interpreter::visit_logical_expression(parser::LogicalExpression &expression)
+    {
+        const auto left = this->evaluate(expression.left).value();
+
+        if (expression.op.type == tokenizer::TokenType::OR) {
+            if (Interpreter::is_truthy(left)) { return types::Literal(left); }
+        } else {
+            if (!Interpreter::is_truthy(left)) { return types::Literal(left); }
+        }
+
+        return this->evaluate(expression.right);
+    }
+
     void Interpreter::visit_print_statement(parser::PrintStatement &statement)
     {
         const types::Literal value = this->evaluate(statement.expression);
@@ -128,6 +141,24 @@ namespace tek::interpreter {
     void Interpreter::visit_block_statement(parser::BlockStatement &statement)
     {
         this->execute_block(statement.statements, std::make_unique<Environment>(std::move(this->environment)));
+    }
+
+    void Interpreter::visit_if_statement(parser::IfStatement &statement)
+    {
+        if (Interpreter::is_truthy(this->evaluate(statement.condition).value())) {
+            this->execute(statement.then_branch);
+        } else {
+            this->execute(statement.else_branch);
+        }
+    }
+
+    void Interpreter::visit_while_statement(parser::WhileStatement &statement)
+    {
+        auto condition = Interpreter::is_truthy(this->evaluate(statement.condition).value());
+        while (condition) {
+            condition = Interpreter::is_truthy(this->evaluate(statement.condition).value());
+            this->execute(statement.body);
+        }
     }
 
     types::Literal Interpreter::interpret_unary_minus(
@@ -229,8 +260,8 @@ namespace tek::interpreter {
     {
         if (std::holds_alternative<std::nullptr_t>(value)) {
             return false;
-        } else if (const auto boolean = std::get<bool>(value)) {
-            return boolean;
+        } else if (std::holds_alternative<bool>(value)) {
+            return std::get<bool>(value);
         } else {
             return true;
         }
