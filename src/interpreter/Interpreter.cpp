@@ -147,7 +147,7 @@ namespace tek::interpreter {
     {
         if (Interpreter::is_truthy(this->evaluate(statement.condition).value())) {
             this->execute(statement.then_branch);
-        } else {
+        } else if (statement.else_branch) {
             this->execute(statement.else_branch);
         }
     }

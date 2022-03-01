@@ -48,7 +48,7 @@ namespace tek::parser {
       Statement::ExpressionPtr  condition,
       IfStatement::StatementPtr then_branch,
       IfStatement::StatementPtr else_branch)
-      : condition{ std::move(condition) }, then_branch{ std::move(else_branch) }, else_branch{ std::move(else_branch) }
+      : condition{ std::move(condition) }, then_branch{ std::move(then_branch) }, else_branch{ std::move(else_branch) }
     {}
 
     std::string IfStatement::accept(StatementVisitor<std::string> &visitor)
