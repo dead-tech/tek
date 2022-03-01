@@ -1,0 +1,4 @@
+// ignore
+var a = "1";
+var a = "2";
+print a; // expected: '2:'

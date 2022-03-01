@@ -68,7 +68,12 @@ def print_results(
     expected_result: str,
 ) -> None:
     print(f'{color_red(f"[NOTE] Got:      {actual_result.stdout}")}')
-    print(f'{color_red(f"[NOTE] Expected: {expected_result}")}')
+    print(f'{color_red(f"[NOTE] Expected: {expected_result.encode()}")}')
+
+
+def print_ignored_test(filename: str) -> None:
+    left_column = f'[TEST] {filename}'
+    print(color_header(left_column + 'IGNORED'.rjust(80 - len(left_column), '.')))  # noqa: E501
 
 
 def print_succeeding_test(filename: str) -> None:
@@ -104,6 +109,7 @@ def run_examples(examples: list[str]) -> None:
             first_line: str = lines[0]
 
             if 'ignore' in first_line.lower():
+                print_ignored_test(filename)
                 ignored += 1
                 continue
 

@@ -160,6 +160,7 @@ namespace tek::interpreter {
 
     void Interpreter::visit_for_statement(parser::ForStatement &statement)
     {
+        // TODO: Create new scope for initializer and for body
         if (statement.initializer) { this->execute(statement.initializer); }
         while (Interpreter::is_truthy(this->evaluate(statement.condition).value())) { this->execute(statement.body); }
     }

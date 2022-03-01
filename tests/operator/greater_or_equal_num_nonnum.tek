@@ -1,0 +1,2 @@
+// expect runtime error: Operands must be numbers.
+1 >= "1"; // expected: '(fail)'

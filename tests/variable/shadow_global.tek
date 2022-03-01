@@ -1,0 +1,7 @@
+// ignore
+var a = "global";
+{
+  var a = "shadow";
+  print a; // expect: shadow
+}
+print a; // expected: 'shadow:global:'

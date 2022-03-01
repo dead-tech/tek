@@ -21,6 +21,7 @@ namespace tek::interpreter {
         throw exceptions::RuntimeError(name, "Undefined variable '" + name.lexeme + "'.");
     }
 
+    // TODO: Fix variables shadowing
     void Environment::assign(const tokenizer::Token &name, const types::Literal &value)
     {
         const auto it = this->variables.find(name.lexeme);

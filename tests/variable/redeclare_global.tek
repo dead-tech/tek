@@ -1,0 +1,4 @@
+// ignore
+var a = "1";
+var a;
+print a; // expected: 'nil:'

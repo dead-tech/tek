@@ -1,0 +1,2 @@
+print 123 + 456; // expect: 579
+print "str" + "ing"; // expected: '579.000000:string:'

@@ -1,0 +1,2 @@
+ // expect runtime error: Operands must be two numbers or two strings.
+true + "s"; //expected: '(fail)'

@@ -1,0 +1,2 @@
+// runtime error: Undefined variable 'unknown'.
+unknown = "what"; // expected: '(fail)'
