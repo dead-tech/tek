@@ -97,7 +97,11 @@ namespace tek::interpreter {
 
     types::Literal Interpreter::visit_var_expression(parser::VarExpression &expression)
     {
-        return this->environment->get(expression.name);
+        try {
+            return this->environment->get(expression.name);
+        } catch (const exceptions::RuntimeError &error) {
+            logger::Logger::runtime_error(error);
+        }
     }
 
     types::Literal Interpreter::visit_assign_expression(parser::AssignExpression &expression)
