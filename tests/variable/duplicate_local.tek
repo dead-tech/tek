@@ -1,6 +1,5 @@
-// ignore
-// Error at 'a': Already a variable with this name in this scope.
 {
   var a = "value";
   var a = "other";
-} // expected: '(fail)'
+  print a;
+} // expected: 'other:'
