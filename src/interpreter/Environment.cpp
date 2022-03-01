@@ -8,7 +8,7 @@ namespace tek::interpreter {
 
     void Environment::define(const std::string &name, const tek::types::Literal &initializer)
     {
-        this->variables.emplace(name, initializer);
+        this->variables.insert_or_assign(name, initializer);
     }
 
     types::Literal Environment::get(const tokenizer::Token &name)
