@@ -29,7 +29,7 @@ namespace tek::interpreter {
         const auto previous = this->environment;
 
         try {
-            utils::ScopeGuard guard(this->environment, [&](auto &environment) { environment = previous; });
+            utils::ScopeGuard guard([&]() { this->environment = previous; });
             this->environment = environment;
             for (const auto &statement : statements) { this->execute(statement); }
         } catch (const exceptions::RuntimeError &error) {
@@ -140,7 +140,7 @@ namespace tek::interpreter {
 
     void Interpreter::visit_block_statement(parser::BlockStatement &statement)
     {
-        this->execute_block(statement.statements, std::make_unique<Environment>(std::move(this->environment)));
+        this->execute_block(statement.statements, std::make_shared<Environment>(this->environment));
     }
 
     void Interpreter::visit_if_statement(parser::IfStatement &statement)
@@ -160,7 +160,12 @@ namespace tek::interpreter {
 
     void Interpreter::visit_for_statement(parser::ForStatement &statement)
     {
-        // TODO: Create new scope for initializer and for body
+        const auto previous        = this->environment;
+        const auto new_environment = std::make_shared<Environment>(this->environment);
+
+        utils::ScopeGuard guard([&]() { this->environment = previous; });
+        this->environment = new_environment;
+
         if (statement.initializer) { this->execute(statement.initializer); }
         while (Interpreter::is_truthy(this->evaluate(statement.condition).value())) { this->execute(statement.body); }
     }

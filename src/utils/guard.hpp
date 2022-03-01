@@ -2,15 +2,14 @@
 #define TEK_GUARD_HPP
 
 namespace tek::utils {
-    template<typename Target, typename Lambda>
+    template<typename Lambda>
     class ScopeGuard
     {
       public:
-        ScopeGuard(Target target, Lambda cleanup) : cleanup{ cleanup }, target{ target } {}
-        ~ScopeGuard() { this->cleanup(target); }
+        explicit ScopeGuard(Lambda cleanup) : cleanup{ cleanup } {}
+        ~ScopeGuard() { this->cleanup(); }
 
       private:
-        Target target;
         Lambda cleanup;
     };
 }// namespace tek::utils
