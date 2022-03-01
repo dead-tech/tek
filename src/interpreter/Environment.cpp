@@ -24,7 +24,10 @@ namespace tek::interpreter {
     void Environment::assign(const tokenizer::Token &name, const types::Literal &value)
     {
         const auto it = this->variables.find(name.lexeme);
-        if (it != this->variables.end()) { this->variables.at(name.lexeme) = value; }
+        if (it != this->variables.end()) {
+            this->variables.at(name.lexeme) = value;
+            return;
+        }
 
         if (this->enclosing != nullptr) {
             this->enclosing->assign(name, value);

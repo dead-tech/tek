@@ -111,6 +111,23 @@ namespace tek::parser {
         StatementPtr  body;
     };
 
+    class ForStatement : public Statement
+    {
+      private:
+        using StatementPtr = std::unique_ptr<Statement>;
+
+      public:
+        ForStatement(StatementPtr initializer, ExpressionPtr condition, StatementPtr body);
+
+        std::string accept(StatementVisitor<std::string> &visitor) override;
+        void        accept(StatementVisitor<void> &visitor) override;
+
+      public:
+        StatementPtr  initializer;
+        ExpressionPtr condition;
+        StatementPtr  body;
+    };
+
     template<typename ReturnType>
     class StatementVisitor
     {
@@ -121,6 +138,7 @@ namespace tek::parser {
         virtual ReturnType visit_block_statement(BlockStatement &statement)           = 0;
         virtual ReturnType visit_if_statement(IfStatement &statement)                 = 0;
         virtual ReturnType visit_while_statement(WhileStatement &statement)           = 0;
+        virtual ReturnType visit_for_statement(ForStatement &statement)               = 0;
     };
 }// namespace tek::parser
 

@@ -39,6 +39,7 @@ namespace tek::interpreter {
         void visit_block_statement(parser::BlockStatement &statement) override;
         void visit_if_statement(parser::IfStatement &statement) override;
         void visit_while_statement(parser::WhileStatement &statement) override;
+        void visit_for_statement(parser::ForStatement &statement) override;
 
         // Statement impl
       private:

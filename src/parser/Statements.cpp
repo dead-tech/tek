@@ -68,4 +68,18 @@ namespace tek::parser {
     }
 
     void WhileStatement::accept(StatementVisitor<void> &visitor) { return visitor.visit_while_statement(*this); }
+
+    ForStatement::ForStatement(
+      ForStatement::StatementPtr initializer,
+      Statement::ExpressionPtr   condition,
+      ForStatement::StatementPtr body)
+      : initializer{ std::move(initializer) }, condition{ std::move(condition) }, body{ std::move(body) }
+    {}
+
+    std::string ForStatement::accept(StatementVisitor<std::string> &visitor)
+    {
+        return visitor.visit_for_statement(*this);
+    }
+
+    void ForStatement::accept(StatementVisitor<void> &visitor) { return visitor.visit_for_statement(*this); }
 }// namespace tek::parser

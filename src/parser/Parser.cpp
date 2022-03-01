@@ -235,47 +235,24 @@ namespace tek::parser {
     {
         this->consume(tokenizer::TokenType::LEFT_PAREN, "Expected '(' after for keyword.");
 
-        StatementPtr initializer;
-        if (this->match(tokenizer::TokenType::SEMICOLON)) {
-            initializer = nullptr;
-        } else if (this->match(tokenizer::TokenType::VAR)) {
-            initializer = this->var_statement();
-        } else {
-            initializer = this->expression_statement();
-        }
+        if (!this->match(tokenizer::TokenType::VAR)) { error(this->peek(), "Expected loop variable initializer."); }
+        StatementPtr initializer = this->var_statement();
 
-        ExpressionPtr condition;
-        if (!this->match(tokenizer::TokenType::SEMICOLON)) { condition = this->expression(); }
-
+        ExpressionPtr condition = this->expression();
         this->consume(tokenizer::TokenType::SEMICOLON, "Expected ';' after for loop condition.");
 
-        ExpressionPtr increment;
-        if (!this->match(tokenizer::TokenType::RIGHT_PAREN)) { increment = this->expression(); }
-
-        // Is this the correct error message, though?
-        this->consume(tokenizer::TokenType::RIGHT_PAREN, "Expected ';' after loop increment variable.");
+        ExpressionPtr increment = this->expression();
+        this->consume(tokenizer::TokenType::RIGHT_PAREN, "Expected ')' after for loop increment expression.");
 
         auto body = this->statement();
 
-        if (increment != nullptr) {
-            StatementsVec out;
-            out.push_back(std::move(initializer));
-            out.push_back(std::make_unique<ExpressionStatement>(std::move(increment)));
-            body = std::make_unique<BlockStatement>(std::move(out));
-        }
+        StatementsVec out;
+        out.push_back(std::move(body));
+        out.push_back(std::make_unique<ExpressionStatement>(std::move(increment)));
 
-        if (condition == nullptr) { condition = std::make_unique<LiteralExpression>(true); }
+        body = std::make_unique<BlockStatement>(std::move(out));
 
-        body = std::make_unique<WhileStatement>(std::move(condition), std::move(body));
-
-        if (initializer != nullptr) {
-            StatementsVec out;
-            out.push_back(std::move(initializer));
-            out.push_back(std::move(body));
-            body = std::make_unique<BlockStatement>(std::move(out));
-        }
-
-        return body;
+        return std::make_unique<ForStatement>(std::move(initializer), std::move(condition), std::move(body));
     }
 
     template<typename Match>
