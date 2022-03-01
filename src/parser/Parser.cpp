@@ -235,12 +235,12 @@ namespace tek::parser {
     {
         this->consume(tokenizer::TokenType::LEFT_PAREN, "Expected '(' after for keyword.");
 
-        StatementPtr initializer = this->for_statement_initializer();
+        auto initializer = this->for_statement_initializer();
 
-        ExpressionPtr condition = this->for_statement_condition();
+        auto condition = this->for_statement_condition();
         this->consume(tokenizer::TokenType::SEMICOLON, "Expected ';' after for loop condition.");
 
-        ExpressionPtr increment = this->for_statement_increment();
+        auto increment = this->for_statement_increment();
         this->consume(tokenizer::TokenType::RIGHT_PAREN, "Expected ')' after for loop increment expression.");
 
         auto body = this->for_statement_body(increment);
@@ -255,6 +255,9 @@ namespace tek::parser {
         } else if (this->match(tokenizer::TokenType::SEMICOLON)) {
             return nullptr;
         }
+
+        // Not quite sure
+        return this->expression_statement();
     }
 
     Parser::ExpressionPtr Parser::for_statement_condition()
@@ -279,6 +282,7 @@ namespace tek::parser {
     {
         auto body = this->statement();
 
+        // TODO: Find a better way to do this
         StatementsVec out;
         out.push_back(std::move(body));
         if (increment) { out.push_back(std::make_unique<ExpressionStatement>(std::move(increment))); }

@@ -154,23 +154,14 @@ namespace tek::interpreter {
 
     void Interpreter::visit_while_statement(parser::WhileStatement &statement)
     {
-        // TODO: fix this
-        auto condition = Interpreter::is_truthy(this->evaluate(statement.condition).value());
-        while (condition) {
-            condition = Interpreter::is_truthy(this->evaluate(statement.condition).value());
-            this->execute(statement.body);
-        }
+        while (Interpreter::is_truthy(this->evaluate(statement.condition).value())) { this->execute(statement.body); }
     }
 
 
     void Interpreter::visit_for_statement(parser::ForStatement &statement)
     {
         if (statement.initializer) { this->execute(statement.initializer); }
-        auto condition = Interpreter::is_truthy(this->evaluate(statement.condition).value());
-        while (condition) {
-            condition = Interpreter::is_truthy(this->evaluate(statement.condition).value());
-            this->execute(statement.body);
-        }
+        while (Interpreter::is_truthy(this->evaluate(statement.condition).value())) { this->execute(statement.body); }
     }
 
     types::Literal Interpreter::interpret_unary_minus(
