@@ -1,6 +1,5 @@
-// ignore
-// Error at 'a': Can't read local variable in its own initializer.
 var a = "outer";
 {
   var a = a;
-} // expected: '(fail)'
+  print a;
+} // expected: 'outer:'
