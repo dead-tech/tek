@@ -45,6 +45,12 @@ namespace tek::parser {
         [[nodiscard]] StatementPtr  while_statement();
         [[nodiscard]] StatementPtr  for_statement();
 
+        // for loop helpers
+        [[nodiscard]] StatementPtr  for_statement_initializer();
+        [[nodiscard]] ExpressionPtr for_statement_condition();
+        [[nodiscard]] ExpressionPtr for_statement_increment();
+        [[nodiscard]] StatementPtr  for_statement_body(ExpressionPtr &increment);
+
         template<typename Match>
         [[nodiscard]] constexpr bool match(Match &&match);
 

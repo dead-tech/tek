@@ -165,7 +165,7 @@ namespace tek::interpreter {
 
     void Interpreter::visit_for_statement(parser::ForStatement &statement)
     {
-        this->execute(statement.initializer);
+        if (statement.initializer) { this->execute(statement.initializer); }
         auto condition = Interpreter::is_truthy(this->evaluate(statement.condition).value());
         while (condition) {
             condition = Interpreter::is_truthy(this->evaluate(statement.condition).value());

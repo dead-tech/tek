@@ -235,24 +235,55 @@ namespace tek::parser {
     {
         this->consume(tokenizer::TokenType::LEFT_PAREN, "Expected '(' after for keyword.");
 
-        if (!this->match(tokenizer::TokenType::VAR)) { error(this->peek(), "Expected loop variable initializer."); }
-        StatementPtr initializer = this->var_statement();
+        StatementPtr initializer = this->for_statement_initializer();
 
-        ExpressionPtr condition = this->expression();
+        ExpressionPtr condition = this->for_statement_condition();
         this->consume(tokenizer::TokenType::SEMICOLON, "Expected ';' after for loop condition.");
 
-        ExpressionPtr increment = this->expression();
+        ExpressionPtr increment = this->for_statement_increment();
         this->consume(tokenizer::TokenType::RIGHT_PAREN, "Expected ')' after for loop increment expression.");
 
+        auto body = this->for_statement_body(increment);
+
+        return std::make_unique<ForStatement>(std::move(initializer), std::move(condition), std::move(body));
+    }
+
+    Parser::StatementPtr Parser::for_statement_initializer()
+    {
+        if (this->match(tokenizer::TokenType::VAR)) {
+            return this->var_statement();
+        } else if (this->match(tokenizer::TokenType::SEMICOLON)) {
+            return nullptr;
+        }
+    }
+
+    Parser::ExpressionPtr Parser::for_statement_condition()
+    {
+        if (!this->check(tokenizer::TokenType::SEMICOLON)) {
+            return this->expression();
+        } else {
+            return std::make_unique<LiteralExpression>(types::Literal(true).value());
+        }
+    }
+
+    Parser::ExpressionPtr Parser::for_statement_increment()
+    {
+        if (!this->check(tokenizer::TokenType::RIGHT_PAREN)) {
+            return this->expression();
+        } else {
+            return nullptr;
+        }
+    }
+
+    Parser::StatementPtr Parser::for_statement_body(ExpressionPtr &increment)
+    {
         auto body = this->statement();
 
         StatementsVec out;
         out.push_back(std::move(body));
-        out.push_back(std::make_unique<ExpressionStatement>(std::move(increment)));
+        if (increment) { out.push_back(std::make_unique<ExpressionStatement>(std::move(increment))); }
 
-        body = std::make_unique<BlockStatement>(std::move(out));
-
-        return std::make_unique<ForStatement>(std::move(initializer), std::move(condition), std::move(body));
+        return std::make_unique<BlockStatement>(std::move(out));
     }
 
     template<typename Match>
