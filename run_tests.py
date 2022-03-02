@@ -60,7 +60,7 @@ def build_executable(build_dir: str, target: str, verbose: bool) -> str:
         result = subprocess.run(['make', target], capture_output=True)
         check_exit_code(result, f'Unable to build target {target}...')
 
-        if not verbose:
+        if verbose:
             print(color_green(f'[BUILD] Built target {target}'))
 
         return os.path.abspath('tek')
@@ -95,14 +95,14 @@ def print_succeeding_test(filename: str) -> None:
 
 
 def print_failing_test(filename: str) -> None:
-    left_column = f'[TEST] {filename}'
+    left_column = f'[TEST] {Path(filename).absolute().resolve()}'
     print(color_red(left_column + 'FAILED'.rjust(80 - len(left_column), '.')))
 
 
 def assert_results(filename, assert_expression: bool, verbose: bool) -> bool:
     try:
         assert(assert_expression)
-        if not verbose:
+        if verbose:
             print_succeeding_test(filename)
         return True
     except AssertionError:
@@ -160,11 +160,21 @@ def capture_tests_output(
     for test in tests:
         result = subprocess.run([executable, test], capture_output=True)
         expected_result = result.stdout.decode().replace('\n', ':')
-        with open(test.replace('.tek', '.txt'), 'w') as file:
+        test_out_file = test.replace('.tek', '.txt')
+        with open(test_out_file, 'w') as file:
             if result.returncode == 0:
                 file.write(f'e: {expected_result}')
             else:
                 file.write('e: fail')
+
+        if verbose:
+            printable_test = test.split('/')[-1]
+            printable_test_out_file = test_out_file.split('/')[-1]
+            print(
+                color_header(
+                    f'[INFO] Ran {printable_test:<40} {"saved stdout ->":<14} {printable_test_out_file:<40}',  # noqa: E501
+                ),
+            )
 
 
 def main() -> int:
@@ -195,7 +205,7 @@ def main() -> int:
     parser.add_argument(
         '--verbose',
         help='don\'t show succeeding and ignored tests',
-        action='store_false',
+        action='store_true',
     )
     args = parser.parse_args()
 
