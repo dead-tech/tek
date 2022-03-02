@@ -212,6 +212,8 @@ def main() -> int:
     executable = build_executable(args.build_dir, args.target, args.verbose)
     tests = find_tests(args.tests_dir)
 
+    print(os.getcwd())
+    print(os.listdir())
     if args.capture:
         capture_tests_output(executable, tests, args.verbose)
     else:
