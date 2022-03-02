@@ -39,4 +39,4 @@ jobs:
       - name: Build
         run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
       - name: Run Examples
-        run: python ${{github.workspace}}/run_tests.py
+        run: python ${{github.workspace}}/run_tests.py --capture --verbose
