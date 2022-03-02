@@ -1,13 +1,25 @@
 from __future__ import annotations
 
+import argparse
 import os
 import subprocess
 import sys
+from contextlib import contextmanager
+from pathlib import Path
 
-BUILD_PATH: str = f'{os.getcwd()}/build/'
-BINARY_PATH: str = f'{os.getcwd()}/build/tek'
-TARGET: str = 'tek'
-TESTS_PATH = f'{os.getcwd()}/tests/'
+
+@contextmanager
+def set_directory(path: Path):
+    origin = Path().absolute()
+
+    if origin == path:
+        return
+
+    try:
+        os.chdir(path)
+        yield
+    finally:
+        os.chdir(origin)
 
 
 class bcolors:
@@ -40,23 +52,24 @@ def check_exit_code(result: subprocess.CompletedProcess, message: str) -> None:
         sys.exit(1)
 
 
-def build_executable() -> None:
-    if not os.getcwd().endswith('/build'):
-        os.chdir(BUILD_PATH)
+def build_executable(build_dir: str, target: str, verbose: bool) -> str:
+    with set_directory(build_dir):
+        result = subprocess.run(['cmake', '..'], capture_output=True)
+        check_exit_code(result, 'Unable to generate cmake project...')
 
-    result = subprocess.run(['cmake', '..'], capture_output=True)
-    check_exit_code(result, 'Unable to generate cmake project...')
+        result = subprocess.run(['make', target], capture_output=True)
+        check_exit_code(result, f'Unable to build target {target}...')
 
-    result = subprocess.run(['make', 'tek'], capture_output=True)
-    check_exit_code(result, f'Unable to build target {TARGET}...')
+        if verbose:
+            print(color_green(f'[BUILD] Built target {target}'))
 
-    print(color_green(f'[BUILD] Built target {TARGET}'))
+        return os.path.abspath('tek')
 
 
-def find_examples() -> list[str]:
+def find_tests(tests_dir: str) -> list[str]:
     out: list[str] = []
 
-    for dirpath, _, filenames in os.walk(TESTS_PATH):
+    for dirpath, _, filenames in os.walk(tests_dir):
         for filename in [f for f in filenames if f.endswith('.tek')]:
             out.append(os.path.join(dirpath, filename))
 
@@ -82,66 +95,127 @@ def print_succeeding_test(filename: str) -> None:
 
 
 def print_failing_test(filename: str) -> None:
-    left_column = f'[TEST] {filename}'
+    left_column = f'[TEST] {Path(filename).absolute().resolve()}'
     print(color_red(left_column + 'FAILED'.rjust(80 - len(left_column), '.')))
 
 
-def assert_results(filename, assert_expression: bool) -> bool:
+def assert_results(filename, assert_expression: bool, verbose: bool) -> bool:
     try:
         assert(assert_expression)
-        print_succeeding_test(filename)
+        if verbose:
+            print_succeeding_test(filename)
         return True
     except AssertionError:
         print_failing_test(filename)
 
 
-def run_examples(examples: list[str]) -> None:
-    if not os.getcwd().endswith('/build'):
-        os.chdir(BUILD_PATH)
-
+def run_tests(executable: str, tests: list[str], verbose: bool) -> None:
     succeeding = 0
-    ignored = 0
+    ignoring = 0
 
-    for example in examples:
-        filename = example.split('/')[-1]
-        with open(example) as file:
+    for test in tests:
+        filename = test.split('/')[-1]
+        with open(test.replace('.tek', '.txt')) as file:
             lines = file.readlines()
             first_line: str = lines[0]
 
-            if 'ignore' in first_line.lower():
-                print_ignored_test(filename)
-                ignored += 1
+            try:
+                lines[1]
+                ignoring += 1
                 continue
+            except IndexError:
+                pass
 
-            last_line: str = lines[-1]
-            expected_result: str = last_line[
-                last_line.find(
-                    '\'',
-                ) + 1:-2
-            ].rstrip().replace(':', '\n')
-            result = subprocess.run(['./tek', example], capture_output=True)
+            expected_result: str = first_line[3:].replace(':', '\n')
+            result = subprocess.run([executable, test], capture_output=True)
 
-            if expected_result == '(fail)':
-                if assert_results(filename, result.returncode != 0):
+            if expected_result == 'fail':
+                if assert_results(filename, result.returncode != 0, verbose):
                     succeeding += 1
                 else:
                     print_results(result, expected_result)
                     sys.exit(1)
                 continue
 
-            if assert_results(filename, expected_result == result.stdout.decode()):  # noqa: E501
+            if assert_results(
+                filename,
+                expected_result == result.stdout.decode(),
+                verbose,
+            ):
                 succeeding += 1
             else:
                 print_results(result, expected_result)
                 sys.exit(1)
 
-    print(f'\n{color_header("[TESTS RECAP]")} {color_green(f"succeeding: {succeeding}")}, ignored: {ignored}\n')  # noqa: E501
+    succeeding_str = color_green(f'succeeding: {succeeding}')
+    ignoring_str = color_header(f'ignoring: {ignoring}')
+    print(f'\n{color_header("[TESTS RECAP]")} {succeeding_str}, {ignoring_str}')  # noqa: E501
+
+
+def capture_tests_output(
+    executable: str,
+    tests: list[str],
+    verbose: bool,
+) -> None:
+    for test in tests:
+        result = subprocess.run([executable, test], capture_output=True)
+        expected_result = result.stdout.decode().replace('\n', ':')
+        test_out_file = test.replace('.tek', '.txt')
+        with open(test_out_file, 'w') as file:
+            if result.returncode == 0:
+                file.write(f'e: {expected_result}')
+            else:
+                file.write('e: fail')
+
+        if verbose:
+            printable_test = test.split('/')[-1]
+            printable_test_out_file = test_out_file.split('/')[-1]
+            print(
+                color_header(
+                    f'[INFO] Ran {printable_test:<40} {"saved stdout ->":<14} {printable_test_out_file:<40}',  # noqa: E501
+                ),
+            )
 
 
 def main() -> int:
-    build_executable()
-    found_examples: list[str] = find_examples()
-    run_examples(found_examples)
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '--build-dir',
+        help='path to build directory',
+        default='./build/',
+        type=str,
+    )
+    parser.add_argument(
+        '--target',
+        help='target to build',
+        default='tek',
+        type=str,
+    )
+    parser.add_argument(
+        '--tests-dir',
+        help='path to tests directory',
+        default='./tests/',
+        type=str,
+    )
+    parser.add_argument(
+        '--capture',
+        help='captures stdout and saves it as expected result for tests',
+        action='store_true',
+    )
+    parser.add_argument(
+        '--verbose',
+        help='don\'t show succeeding and ignored tests',
+        action='store_true',
+    )
+    args = parser.parse_args()
+
+    executable = build_executable(args.build_dir, args.target, args.verbose)
+    tests = find_tests(args.tests_dir)
+
+    if args.capture:
+        capture_tests_output(executable, tests, args.verbose)
+
+    run_tests(executable, tests, args.verbose)
 
 
 if __name__ == '__main__':
