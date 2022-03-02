@@ -170,7 +170,7 @@ def capture_tests_output(
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        '--build',
+        '--build-dir',
         help='path to build directory',
         default='build/',
         type=str,
@@ -199,7 +199,7 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    executable = build_executable(args.build, args.target, args.verbose)
+    executable = build_executable(args.build_dir, args.target, args.verbose)
     tests = find_tests(args.tests_dir)
 
     if args.capture:
