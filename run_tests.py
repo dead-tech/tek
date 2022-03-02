@@ -52,8 +52,8 @@ def check_exit_code(result: subprocess.CompletedProcess, message: str) -> None:
         sys.exit(1)
 
 
-def build_executable(build_path: str, target: str, verbose: bool) -> str:
-    with set_directory(build_path):
+def build_executable(build_dir: str, target: str, verbose: bool) -> str:
+    with set_directory(build_dir):
         result = subprocess.run(['cmake', '..'], capture_output=True)
         check_exit_code(result, 'Unable to generate cmake project...')
 
@@ -66,10 +66,10 @@ def build_executable(build_path: str, target: str, verbose: bool) -> str:
         return os.path.abspath('tek')
 
 
-def find_tests(tests_folder: str) -> list[str]:
+def find_tests(tests_dir: str) -> list[str]:
     out: list[str] = []
 
-    for dirpath, _, filenames in os.walk(tests_folder):
+    for dirpath, _, filenames in os.walk(tests_dir):
         for filename in [f for f in filenames if f.endswith('.tek')]:
             out.append(os.path.join(dirpath, filename))
 
@@ -111,29 +111,25 @@ def assert_results(filename, assert_expression: bool, verbose: bool) -> bool:
 
 def run_tests(executable: str, tests: list[str], verbose: bool) -> None:
     succeeding = 0
-    ignored = 0
+    ignoring = 0
 
     for test in tests:
         filename = test.split('/')[-1]
-        with open(test) as file:
+        with open(test.replace('.tek', '.txt')) as file:
             lines = file.readlines()
             first_line: str = lines[0]
 
-            if 'ignore' in first_line.lower():
-                if not verbose:
-                    print_ignored_test(filename)
-                ignored += 1
+            try:
+                lines[1]
+                ignoring += 1
                 continue
+            except IndexError:
+                pass
 
-            last_line: str = lines[-1]
-            expected_result: str = last_line[
-                last_line.find(
-                    '\'',
-                ) + 1:-2
-            ].rstrip().replace(':', '\n')
+            expected_result: str = first_line[3:].replace(':', '\n')
             result = subprocess.run([executable, test], capture_output=True)
 
-            if expected_result == '(fail)':
+            if expected_result == 'fail':
                 if assert_results(filename, result.returncode != 0, verbose):
                     succeeding += 1
                 else:
@@ -151,23 +147,50 @@ def run_tests(executable: str, tests: list[str], verbose: bool) -> None:
                 print_results(result, expected_result)
                 sys.exit(1)
 
-    print(f'\n{color_header("[TESTS RECAP]")} {color_green(f"succeeding: {succeeding}")}, ignored: {ignored}\n')  # noqa: E501
+    succeeding_str = color_green(f'succeeding: {succeeding}')
+    ignoring_str = color_header(f'ignoring: {ignoring}')
+    print(f'\n{color_header("[TESTS RECAP]")} {succeeding_str}, {ignoring_str}')  # noqa: E501
+
+
+def capture_tests_output(
+    executable: str,
+    tests: list[str],
+    verbose: bool,
+) -> None:
+    for test in tests:
+        result = subprocess.run([executable, test], capture_output=True)
+        expected_result = result.stdout.decode().replace('\n', ':')
+        with open(test.replace('.tek', '.txt'), 'w') as file:
+            if result.returncode == 0:
+                file.write(f'e: {expected_result}')
+            else:
+                file.write('e: fail')
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        '--build', help='path to build directory', default='build/', type=str,
+        '--build',
+        help='path to build directory',
+        default='build/',
+        type=str,
     )
     parser.add_argument(
-        '--target', help='target to build',
-        default='tek', type=str,
+        '--target',
+        help='target to build',
+        default='tek',
+        type=str,
     )
     parser.add_argument(
         '--tests-dir',
         help='path to tests directory',
         default='tests/',
         type=str,
+    )
+    parser.add_argument(
+        '--capture',
+        help='captures stdout and saves it as expected result for tests',
+        action='store_true',
     )
     parser.add_argument(
         '--verbose',
@@ -178,7 +201,11 @@ def main() -> int:
 
     executable = build_executable(args.build, args.target, args.verbose)
     tests = find_tests(args.tests_dir)
-    run_tests(executable, tests, args.verbose)
+
+    if args.capture:
+        capture_tests_output(executable, tests, args.verbose)
+    else:
+        run_tests(executable, tests, args.verbose)
 
 
 if __name__ == '__main__':
