@@ -46,6 +46,7 @@ namespace tek::parser {
         [[nodiscard]] StatementPtr  while_statement();
         [[nodiscard]] StatementPtr  for_statement();
         [[nodiscard]] StatementPtr  function_statement(const std::string &kind);
+        [[nodiscard]] StatementPtr  return_statement();
 
         // for loop helpers
         [[nodiscard]] StatementPtr  for_statement_initializer();

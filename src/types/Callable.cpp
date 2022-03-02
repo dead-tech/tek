@@ -23,18 +23,26 @@ namespace tek::types {
 
     std::string NativeCallable::to_string() const { return "native function"; }
 
-    TekFunction::TekFunction(TekFunction::FunctionStatementPtr declaration) : declaration{ std::move(declaration) } {}
+    TekFunction::TekFunction(TekFunction::FunctionStatementPtr declaration, EnvironmentPtr environment)
+      : declaration{ std::move(declaration) }, closure{ std::move(environment) }
+    {}
 
     Literal TekFunction::call(interpreter::Interpreter &interpreter, std::vector<Literal> arguments)
     {
-        auto environment = std::make_shared<interpreter::Environment>(interpreter.globals);
+        auto environment = std::make_shared<interpreter::Environment>(this->closure);
         for (std::size_t i = 0; i < this->declaration->parameters.size(); ++i) {
             environment->define(this->declaration->parameters.at(i).lexeme, arguments.at(i));
         }
 
-        interpreter.execute_block(this->declaration->body, environment);
-        // Useless value to return, but returning to shut the compiler warning !!
-        return types::Literal("");
+        // Return statement it's handled through throwing an exception. Grrrr..
+        try {
+            interpreter.execute_block(this->declaration->body, environment);
+        } catch (const exceptions::Return &ret) {
+            return ret.retval;
+        }
+        // Return this as in dynamically typed language you could take the return value of a void a function.
+        // With this you always get back nil if you try to do so.
+        return types::Literal(nullptr);
     }
 
     std::size_t TekFunction::get_arity() const { return this->declaration->parameters.size(); }

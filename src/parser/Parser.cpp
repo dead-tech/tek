@@ -164,6 +164,8 @@ namespace tek::parser {
             return this->while_statement();
         } else if (this->match(tokenizer::TokenType::FOR)) {
             return this->for_statement();
+        } else if (this->match(tokenizer::TokenType::RETURN)) {
+            return this->return_statement();
         }
 
         return this->expression_statement();
@@ -290,6 +292,16 @@ namespace tek::parser {
         std::vector<StatementPtr> body = this->block_statement();
 
         return std::make_unique<FunctionStatement>(name, parameters, std::move(body));
+    }
+
+    Parser::StatementPtr Parser::return_statement()
+    {
+        auto          keyword    = this->previous();
+        ExpressionPtr expression = nullptr;
+        if (!this->check(tokenizer::TokenType::COMMA)) { expression = this->expression(); }
+
+        this->consume(tokenizer::TokenType::SEMICOLON, "Expected ';' after return statement.");
+        return std::make_unique<ReturnStatement>(keyword, std::move(expression));
     }
 
     Parser::StatementPtr Parser::for_statement_initializer()

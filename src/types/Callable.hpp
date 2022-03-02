@@ -11,7 +11,8 @@ namespace tek::parser {
 
 namespace tek::interpreter {
     class Interpreter;
-}
+    class Environment;
+}// namespace tek::interpreter
 
 namespace tek::types {
     struct Literal;
@@ -50,9 +51,10 @@ namespace tek::types {
     {
       public:
         using FunctionStatementPtr = std::shared_ptr<parser::FunctionStatement>;
+        using EnvironmentPtr       = std::shared_ptr<interpreter::Environment>;
 
       public:
-        explicit TekFunction(FunctionStatementPtr declaration);
+        explicit TekFunction(FunctionStatementPtr declaration, EnvironmentPtr closure);
 
         [[nodiscard]] Literal     call(interpreter::Interpreter &interpreter, std::vector<Literal> arguments) override;
         [[nodiscard]] std::size_t get_arity() const override;
@@ -60,6 +62,7 @@ namespace tek::types {
 
       private:
         FunctionStatementPtr declaration;
+        EnvironmentPtr       closure;
     };
 }// namespace tek::types
 

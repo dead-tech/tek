@@ -221,7 +221,7 @@ namespace tek::interpreter {
     {
         const auto function_name = statement.name.lexeme;
         auto       function      = std::make_shared<parser::FunctionStatement>(std::move(statement));
-        this->environment->define(function_name, types::Literal(types::TekFunction(function)));
+        this->environment->define(function_name, types::Literal(types::TekFunction(function, this->environment)));
     }
 
     types::Literal Interpreter::interpret_unary_minus(
@@ -231,6 +231,14 @@ namespace tek::interpreter {
         Interpreter::assert_operand_types<double>(expression.op, right);
         const auto value = std::get<double>(right);
         return types::Literal(-value);
+    }
+
+    void Interpreter::visit_return_statement(parser::ReturnStatement &statement)
+    {
+        types::Literal retval(nullptr);
+        if (statement.expression) { retval = this->evaluate(statement.expression); }
+
+        throw exceptions::Return(retval);
     }
 
     types::Literal Interpreter::interpret_binary_minus(

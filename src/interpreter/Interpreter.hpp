@@ -46,6 +46,7 @@ namespace tek::interpreter {
         void visit_while_statement(parser::WhileStatement &statement) override;
         void visit_for_statement(parser::ForStatement &statement) override;
         void visit_function_statement(parser::FunctionStatement &statement) override;
+        void visit_return_statement(parser::ReturnStatement &statement) override;
 
         void execute_block(const StatementsVec &statements, const EnvironmentPtr &environment);
 

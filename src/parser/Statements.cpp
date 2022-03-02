@@ -96,4 +96,15 @@ namespace tek::parser {
     }
 
     void FunctionStatement::accept(StatementVisitor<void> &visitor) { visitor.visit_function_statement(*this); }
+
+    ReturnStatement::ReturnStatement(tokenizer::Token keyword, Statement::ExpressionPtr expression)
+      : keyword{ std::move(keyword) }, expression{ std::move(expression) }
+    {}
+
+    std::string ReturnStatement::accept(StatementVisitor<std::string> &visitor)
+    {
+        return visitor.visit_return_statement(*this);
+    }
+
+    void ReturnStatement::accept(StatementVisitor<void> &visitor) { return visitor.visit_return_statement(*this); }
 }// namespace tek::parser

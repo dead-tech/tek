@@ -21,6 +21,15 @@ namespace tek::exceptions {
         tokenizer::Token op;
         std::string      message;
     };
+
+    class Return : public std::runtime_error
+    {
+      public:
+        explicit Return(types::Literal retval);
+
+      public:
+        types::Literal retval;
+    };
 }// namespace tek::exceptions
 
 #endif// TEK_EXCEPTIONS_HPP
