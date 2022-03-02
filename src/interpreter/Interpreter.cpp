@@ -1,6 +1,21 @@
 #include "Interpreter.hpp"
 
 namespace tek::interpreter {
+
+    types::Literal clock(Interpreter &interpreter, const std::vector<types::Literal> &arguments)
+    {
+        auto current_time        = std::chrono::system_clock::now();
+        auto duration_in_seconds = std::chrono::duration<double>(current_time.time_since_epoch());
+
+        return types::Literal(duration_in_seconds.count());
+    }
+
+    Interpreter::Interpreter()
+    {
+        // TODO: Take this into the standard library
+        this->globals->define("clock", types::Literal(types::NativeCallable("clock", &clock, 0)));
+    }
+
     void Interpreter::interpret(const Interpreter::StatementsVec &statements)
     {
         try {
@@ -102,6 +117,9 @@ namespace tek::interpreter {
         } catch (const exceptions::RuntimeError &error) {
             logger::Logger::runtime_error(error);
         }
+
+        // unreachable
+        return types::Literal("");
     }
 
     types::Literal Interpreter::visit_assign_expression(parser::AssignExpression &expression)
@@ -122,6 +140,31 @@ namespace tek::interpreter {
         }
 
         return this->evaluate(expression.right);
+    }
+
+    types::Literal Interpreter::visit_call_expression(parser::CallExpression &expression)
+    {
+        auto callee = this->evaluate(expression.callee);
+
+        std::vector<types::Literal> evaluated_argumensts;
+
+        for (const auto &arg : expression.arguments) { evaluated_argumensts.emplace_back(this->evaluate(arg).value()); }
+
+        if (const auto function = callee.as_callable()) {
+
+            // Check for the number of arguments
+            const auto actual_argument_num   = evaluated_argumensts.size();
+            const auto expected_argument_num = function->get_arity();
+            if (actual_argument_num != expected_argument_num) {
+                throw exceptions::RuntimeError(
+                  expression.paren,
+                  fmt::format("Expected {} arguments but got {}.", expected_argument_num, actual_argument_num));
+            }
+
+            return function->call(*this, evaluated_argumensts);
+        }
+
+        throw exceptions::RuntimeError(expression.paren, "Call operator lhs is not a callable.");
     }
 
     void Interpreter::visit_print_statement(parser::PrintStatement &statement)
@@ -172,6 +215,13 @@ namespace tek::interpreter {
 
         if (statement.initializer) { this->execute(statement.initializer); }
         while (Interpreter::is_truthy(this->evaluate(statement.condition).value())) { this->execute(statement.body); }
+    }
+
+    void Interpreter::visit_function_statement(parser::FunctionStatement &statement)
+    {
+        const auto function_name = statement.name.lexeme;
+        auto       function      = std::make_shared<parser::FunctionStatement>(std::move(statement));
+        this->environment->define(function_name, types::Literal(types::TekFunction(function)));
     }
 
     types::Literal Interpreter::interpret_unary_minus(

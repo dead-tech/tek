@@ -82,4 +82,18 @@ namespace tek::parser {
     }
 
     void ForStatement::accept(StatementVisitor<void> &visitor) { return visitor.visit_for_statement(*this); }
+
+    FunctionStatement::FunctionStatement(
+      tokenizer::Token              name,
+      std::vector<tokenizer::Token> parameters,
+      StatementsVec                 body)
+      : name{ std::move(name) }, parameters{ std::move(parameters) }, body{ std::move(body) }
+    {}
+
+    std::string FunctionStatement::accept(StatementVisitor<std::string> &visitor)
+    {
+        return visitor.visit_function_statement(*this);
+    }
+
+    void FunctionStatement::accept(StatementVisitor<void> &visitor) { visitor.visit_function_statement(*this); }
 }// namespace tek::parser

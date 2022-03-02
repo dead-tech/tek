@@ -128,6 +128,24 @@ namespace tek::parser {
         StatementPtr  body;
     };
 
+    class FunctionStatement : public Statement
+    {
+      private:
+        using StatementPtr  = std::unique_ptr<Statement>;
+        using StatementsVec = std::vector<StatementPtr>;
+
+      public:
+        FunctionStatement(tokenizer::Token name, std::vector<tokenizer::Token> parameters, StatementsVec body);
+
+        std::string accept(StatementVisitor<std::string> &visitor) override;
+        void        accept(StatementVisitor<void> &visitor) override;
+
+      public:
+        tokenizer::Token              name;
+        std::vector<tokenizer::Token> parameters;
+        StatementsVec                 body;
+    };
+
     template<typename ReturnType>
     class StatementVisitor
     {
@@ -139,6 +157,7 @@ namespace tek::parser {
         virtual ReturnType visit_if_statement(IfStatement &statement)                 = 0;
         virtual ReturnType visit_while_statement(WhileStatement &statement)           = 0;
         virtual ReturnType visit_for_statement(ForStatement &statement)               = 0;
+        virtual ReturnType visit_function_statement(FunctionStatement &statement)     = 0;
     };
 }// namespace tek::parser
 

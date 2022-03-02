@@ -5,11 +5,14 @@
 #include "../logger/Logger.hpp"
 #include "../parser/Expressions.hpp"
 #include "../parser/Statements.hpp"
-#include "../types/Literal.hpp"
 #include "../utils/guard.hpp"
 #include "../utils/traits.hpp"
 #include "../utils/variants.hpp"
 #include "Environment.hpp"
+
+#include <chrono>
+
+struct Literal;
 
 namespace tek::interpreter {
     class Interpreter
@@ -23,6 +26,7 @@ namespace tek::interpreter {
         using StatementsVec  = std::vector<StatementPtr>;
 
       public:
+        Interpreter();
         void interpret(const StatementsVec &statements);
 
         [[nodiscard]] types::Literal visit_literal_expression(parser::LiteralExpression &expression) override;
@@ -32,6 +36,7 @@ namespace tek::interpreter {
         [[nodiscard]] types::Literal visit_var_expression(parser::VarExpression &expression) override;
         [[nodiscard]] types::Literal visit_assign_expression(parser::AssignExpression &expression) override;
         [[nodiscard]] types::Literal visit_logical_expression(parser::LogicalExpression &expression) override;
+        [[nodiscard]] types::Literal visit_call_expression(parser::CallExpression &expression) override;
 
         void visit_print_statement(parser::PrintStatement &statement) override;
         void visit_expression_statement(parser::ExpressionStatement &statement) override;
@@ -40,6 +45,9 @@ namespace tek::interpreter {
         void visit_if_statement(parser::IfStatement &statement) override;
         void visit_while_statement(parser::WhileStatement &statement) override;
         void visit_for_statement(parser::ForStatement &statement) override;
+        void visit_function_statement(parser::FunctionStatement &statement) override;
+
+        void execute_block(const StatementsVec &statements, const EnvironmentPtr &environment);
 
         // Statement impl
       private:
@@ -91,7 +99,6 @@ namespace tek::interpreter {
         types::Literal evaluate(const ExpressionPtr &expression);
 
         void execute(const StatementPtr &statement);
-        void execute_block(const StatementsVec &statements, const EnvironmentPtr &environment);
 
         [[nodiscard]] constexpr static bool is_truthy(const types::Literal::variant_t &value);
         [[nodiscard]] constexpr static bool
@@ -102,8 +109,11 @@ namespace tek::interpreter {
 
         [[nodiscard]] static std::string stringify(const types::Literal &value);
 
+      public:
+        EnvironmentPtr globals = std::make_shared<Environment>();
+
       private:
-        EnvironmentPtr environment = std::make_shared<Environment>();
+        EnvironmentPtr environment = globals;
     };
 }// namespace tek::interpreter
 

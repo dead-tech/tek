@@ -86,7 +86,7 @@ namespace tek::parser {
             return std::make_unique<UnaryExpression>(op, std::move(right));
         }
 
-        return this->primary();
+        return this->call();
     }
 
     Parser::ExpressionPtr Parser::primary()
@@ -136,6 +136,21 @@ namespace tek::parser {
         return left;
     }
 
+    Parser::ExpressionPtr Parser::call()
+    {
+        auto expression = this->primary();
+
+        while (true) {
+            if (this->match(tokenizer::TokenType::LEFT_PAREN)) {
+                expression = this->finish_call(expression);
+            } else {
+                break;
+            }
+        }
+
+        return expression;
+    }
+
     Parser::StatementPtr Parser::statement()
     {
         // check this if it doesn't work
@@ -157,7 +172,11 @@ namespace tek::parser {
     Parser::StatementPtr Parser::declaration()
     {
         try {
-            if (this->match(tokenizer::TokenType::VAR)) { return this->var_statement(); }
+            if (this->match(tokenizer::TokenType::VAR)) {
+                return this->var_statement();
+            } else if (this->match(tokenizer::TokenType::FUN)) {
+                return this->function_statement("function");
+            }
 
             return this->statement();
         } catch (const exceptions::RuntimeError &error) {
@@ -248,6 +267,31 @@ namespace tek::parser {
         return std::make_unique<ForStatement>(std::move(initializer), std::move(condition), std::move(body));
     }
 
+    Parser::StatementPtr Parser::function_statement(const std::string &kind)
+    {
+        const tokenizer::Token name =
+          this->consume(tokenizer::TokenType::IDENTIFIER, fmt::format("Expected {} name.", kind));
+        this->consume(tokenizer::TokenType::LEFT_PAREN, fmt::format("Expected '(' after {} keyword", kind));
+
+        std::vector<tokenizer::Token> parameters;
+        if (!this->check(tokenizer::TokenType::RIGHT_PAREN)) {
+            do {
+                if (parameters.size() >= 255) { Parser::error(this->peek(), "Can't have more than 255 parameters."); }
+
+                parameters.emplace_back(this->consume(tokenizer::TokenType::IDENTIFIER, "Expected parameter name."));
+            } while (this->match(tokenizer::TokenType::COMMA));
+        }
+
+        this->consume(tokenizer::TokenType::RIGHT_PAREN, "Expected ')' after parameter list in function definition.");
+
+        this->consume(
+          tokenizer::TokenType::LEFT_BRACE, fmt::format("Expected '{{' after parameter list in {} definition.", kind));
+
+        std::vector<StatementPtr> body = this->block_statement();
+
+        return std::make_unique<FunctionStatement>(name, parameters, std::move(body));
+    }
+
     Parser::StatementPtr Parser::for_statement_initializer()
     {
         if (this->match(tokenizer::TokenType::VAR)) {
@@ -288,6 +332,24 @@ namespace tek::parser {
         if (increment) { out.push_back(std::make_unique<ExpressionStatement>(std::move(increment))); }
 
         return std::make_unique<BlockStatement>(std::move(out));
+    }
+
+    Parser::ExpressionPtr Parser::finish_call(Parser::ExpressionPtr &callee)
+    {
+        std::vector<ExpressionPtr> arguments;
+        if (!this->check(tokenizer::TokenType::RIGHT_PAREN)) {
+            do {
+                if (arguments.size() >= 255) {
+                    Parser::error(this->peek(), "Function call can't accept more than 255 arguments.");
+                }
+                arguments.push_back(this->expression());
+            } while (this->match(tokenizer::TokenType::COMMA));
+        }
+
+        const tokenizer::Token paren =
+          this->consume(tokenizer::TokenType::RIGHT_PAREN, "Expected '(' after argument list in function call.");
+
+        return std::make_unique<CallExpression>(std::move(callee), paren, std::move(arguments));
     }
 
     template<typename Match>
