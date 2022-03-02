@@ -182,7 +182,7 @@ def main() -> int:
     parser.add_argument(
         '--build-dir',
         help='path to build directory',
-        default='build/',
+        default='./build/',
         type=str,
     )
     parser.add_argument(
@@ -194,7 +194,7 @@ def main() -> int:
     parser.add_argument(
         '--tests-dir',
         help='path to tests directory',
-        default='tests/',
+        default='./tests/',
         type=str,
     )
     parser.add_argument(
