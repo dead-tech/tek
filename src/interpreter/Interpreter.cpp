@@ -2,6 +2,7 @@
 
 namespace tek::interpreter {
 
+    // TODO: Find out why this is not working
     types::Literal clock(Interpreter &interpreter, const std::vector<types::Literal> &arguments)
     {
         auto current_time        = std::chrono::system_clock::now();
