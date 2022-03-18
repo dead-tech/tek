@@ -3,6 +3,7 @@
 #include <string>
 
 #include "interpreter/Interpreter.hpp"
+#include "interpreter/Resolver.hpp"
 #include "logger/Logger.hpp"
 #include "parser/Expressions.hpp"
 #include "parser/Parser.hpp"
@@ -21,10 +22,12 @@ void run(const std::string &source_code)
 
     if (!statements) { return; }
 
-    if (tek::logger::Logger::had_error) {
-        fmt::print("Error!\n");
-        return;
-    }
+    if (tek::logger::Logger::had_error) { return; }
+
+    tek::interpreter::Resolver resolver(interpreter);
+    resolver.resolve(*statements);
+
+    if (tek::logger::Logger::had_error) { return; }
 
     interpreter.interpret(*statements);
 

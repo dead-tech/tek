@@ -26,6 +26,11 @@ namespace tek::interpreter {
         }
     }
 
+    void Interpreter::resolve(parser::Expression *expression, const size_t depth)
+    {
+        this->locals.emplace(expression, depth);
+    }
+
     types::Literal Interpreter::visit_literal_expression(parser::LiteralExpression &expression)
     {
         return expression.literal;
@@ -39,6 +44,16 @@ namespace tek::interpreter {
     types::Literal Interpreter::evaluate(const ExpressionPtr &expression) { return expression->accept(*this); }
 
     void Interpreter::execute(const StatementPtr &statement) { statement->accept(*this); }
+
+    types::Literal Interpreter::lookup_variable(const tokenizer::Token &name, parser::Expression *expression)
+    {
+        try {
+            const auto distance = this->locals.at(expression);
+            return this->environment->get_at(distance, name.lexeme);
+        } catch (const std::out_of_range &e) {
+            return this->globals->get(name);
+        }
+    }
 
     void Interpreter::execute_block(const StatementsVec &statements, const EnvironmentPtr &environment)
     {
@@ -113,21 +128,25 @@ namespace tek::interpreter {
 
     types::Literal Interpreter::visit_var_expression(parser::VarExpression &expression)
     {
-        try {
-            return this->environment->get(expression.name);
-        } catch (const exceptions::RuntimeError &error) {
-            logger::Logger::runtime_error(error);
-        }
-
-        // unreachable
-        return types::Literal("");
+        return this->lookup_variable(expression.name, &expression);
     }
 
     types::Literal Interpreter::visit_assign_expression(parser::AssignExpression &expression)
     {
-        auto value = this->evaluate(expression.value);
-        this->environment->assign(expression.name, value);
-        return value;
+
+        const auto name  = expression.name;
+        auto       value = this->evaluate(expression.value);
+
+
+        try {
+            const auto distance = this->locals.at(&expression);
+            this->environment->assign_at(distance, name, value);
+        } catch (const std::out_of_range &e) {
+            this->globals->assign(name, value);
+        }
+
+        // unreachable
+        return types::Literal("");
     }
 
     types::Literal Interpreter::visit_logical_expression(parser::LogicalExpression &expression)

@@ -28,6 +28,7 @@ namespace tek::interpreter {
       public:
         Interpreter();
         void interpret(const StatementsVec &statements);
+        void resolve(parser::Expression *expression, const size_t depth);
 
         [[nodiscard]] types::Literal visit_literal_expression(parser::LiteralExpression &expression) override;
         [[nodiscard]] types::Literal visit_grouping_expression(parser::GroupingExpression &expression) override;
@@ -101,6 +102,8 @@ namespace tek::interpreter {
 
         void execute(const StatementPtr &statement);
 
+        types::Literal lookup_variable(const tokenizer::Token &name, parser::Expression *expression);
+
         [[nodiscard]] constexpr static bool is_truthy(const types::Literal::variant_t &value);
         [[nodiscard]] constexpr static bool
           is_equal(const types::Literal::variant_t &left, const types::Literal::variant_t &right);
@@ -114,7 +117,8 @@ namespace tek::interpreter {
         EnvironmentPtr globals = std::make_shared<Environment>();
 
       private:
-        EnvironmentPtr environment = globals;
+        EnvironmentPtr                                   environment = globals;
+        std::unordered_map<parser::Expression *, size_t> locals;
     };
 }// namespace tek::interpreter
 

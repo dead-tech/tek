@@ -19,7 +19,12 @@ namespace tek::interpreter {
 
         void                         define(const std::string &name, const types::Literal &initializer);
         [[nodiscard]] types::Literal get(const tokenizer::Token &name);
+        [[nodiscard]] types::Literal get_at(const size_t distance, const std::string &name);
         void                         assign(const tokenizer::Token &name, const types::Literal &value);
+        void assign_at(const size_t distance, const tokenizer::Token &name, const types::Literal &value);
+
+      private:
+        EnvironmentPtr ancestor(const size_t distance);
 
       private:
         std::unordered_map<std::string, types::Literal> variables;
