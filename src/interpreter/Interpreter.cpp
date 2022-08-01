@@ -63,8 +63,7 @@ namespace tek::interpreter {
             utils::ScopeGuard guard([&]() { this->environment = previous; });
             this->environment = environment;
             for (const auto &statement : statements) { this->execute(statement); }
-        } catch (const exceptions::RuntimeError &error) {
-        }
+        } catch (const exceptions::RuntimeError &error) {}
     }
 
     types::Literal Interpreter::visit_unary_expression(parser::UnaryExpression &expression)
