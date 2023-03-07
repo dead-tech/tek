@@ -3,7 +3,7 @@ ci:
   skip: [build-and-run-tests]
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.1.0
+    rev: v4.4.0
     hooks:
       - id: check-yaml
       - id: end-of-file-fixer
@@ -11,29 +11,29 @@ repos:
       - id: check-added-large-files
       - id: double-quote-string-fixer
   - repo: https://github.com/pre-commit/mirrors-clang-format
-    rev: 'v13.0.1'
+    rev: 'v15.0.7'
     hooks:
       - id: clang-format
   - repo: https://github.com/PyCQA/flake8
-    rev: 4.0.1
+    rev: 6.0.0
     hooks:
       - id: flake8
   - repo: https://github.com/pre-commit/mirrors-autopep8
-    rev: v1.6.0
+    rev: v2.0.2
     hooks:
       - id: autopep8
   - repo: https://github.com/asottile/reorder_python_imports
-    rev: v2.7.1
+    rev: v3.9.0
     hooks:
       - id: reorder-python-imports
         args: [ --py37-plus, --add-import, 'from __future__ import annotations' ]
   - repo: https://github.com/asottile/pyupgrade
-    rev: v2.31.0
+    rev: v3.3.1
     hooks:
       - id: pyupgrade
         args: [ --py37-plus ]
   - repo: https://github.com/asottile/add-trailing-comma
-    rev: v2.2.1
+    rev: v2.4.0
     hooks:
       - id: add-trailing-comma
         args: [ --py36-plus ]
