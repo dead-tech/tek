@@ -101,7 +101,7 @@ def print_failing_test(filename: str) -> None:
 
 def assert_results(filename, assert_expression: bool, verbose: bool) -> bool:
     try:
-        assert(assert_expression)
+        assert (assert_expression)
         if verbose:
             print_succeeding_test(filename)
         return True
